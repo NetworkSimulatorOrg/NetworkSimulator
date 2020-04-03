@@ -1,20 +1,26 @@
 public class Message {
-    private Node sender;
-    private char[] payload;
+    private final int sender;
+    private int lastSender;
+    private final char[] payload;
 
-    public Node getSender() {
+    public Message(int sender, char[] payload) {
+        this.sender = sender;
+        this.payload = payload;
+    }
+
+    public int getSender() {
         return sender;
     }
 
-    public void setSender(Node sender) {
-        this.sender = sender;
+    public int getLastSender() {
+        return lastSender;
+    }
+
+    public void setLastSender(int sender) {
+        this.lastSender = sender;
     }
 
     public char[] getPayload() {
         return payload;
-    }
-
-    public void setPayload(char[] payload) {
-        this.payload = payload;
     }
 }
