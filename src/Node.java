@@ -64,7 +64,7 @@ public class Node {
         }
     }
 
-    public void recvMsg(Message msg, int sender) {
+    public void recvMsg(Message msg) {
         try {
             messages.put(msg);
         } catch(InterruptedException e) {

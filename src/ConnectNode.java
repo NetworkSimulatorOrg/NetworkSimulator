@@ -16,11 +16,11 @@ public class ConnectNode extends Node {
         }
     }
 
-    public void recvMsg(Message msg, int sender) {
+    public void recvMsg(Message msg) {
         // Mark node receiving
         boolean collision = addReceiver() > 1;
 
-        super.recvMsg(msg, sender);
+        super.recvMsg(msg);
 
         propagationDelay();
 
