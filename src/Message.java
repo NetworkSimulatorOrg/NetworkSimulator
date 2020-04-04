@@ -8,6 +8,7 @@ public class Message {
 
     public Message(int sender, int sequenceNumber, long timestamp, String payload) {
         this.sender = sender;
+        this.lastSender = sender;
         this.sequenceNumber = sequenceNumber;
         this.timestamp = timestamp;
         this.payload = payload;
