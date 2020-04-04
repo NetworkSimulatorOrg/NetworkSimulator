@@ -11,14 +11,13 @@ public class DeltaList {
         list = Collections.synchronizedList(new ArrayList<>());
     }
 
-    public synchronized void push(Date time) {
-        long milliseconds = time.getTime();
+    public synchronized void push(long time) {
         for(int i = 0; i < list.size(); i++) {
-            if(milliseconds > list.get(i)) {
-                milliseconds -= list.get(i);
+            if(time > list.get(i)) {
+                time -= list.get(i);
             } else {
-                list.add(i, milliseconds);
-                list.set(i + 1, list.get(i+1) - milliseconds);
+                list.add(i, time);
+                list.set(i + 1, list.get(i+1) - time);
             }
         }
     }

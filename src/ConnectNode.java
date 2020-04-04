@@ -5,7 +5,6 @@ public class ConnectNode extends Node {
         super(id, adjacent, propagationRate, distance);
     }
 
-
     public void sendMsg(Message msg) {
         int lastSender = msg.getLastSender();
         msg.setLastSender(id);
@@ -16,17 +15,23 @@ public class ConnectNode extends Node {
         }
     }
 
-    public void recvMsg(Message msg) {
-        // Mark node receiving
-        boolean collision = addReceiver() > 1;
-
-        super.recvMsg(msg);
-
-        propagationDelay();
-
-        collision = collision || removeReceiver() > 0;
-
-        // Report collision
+    // This is not needed. Messages actually being passed between
+    // threads is done in the thread of the sending node. Only 1
+    // thread is needed for a connect node.
+    public void sendMsgThread() {
     }
 
+    public void recvMsgThread() {
+        while (true) {
+            if (messages.size() > 0) {
+                Message msg = recvMsg();
+                // Send out message. Time delay has passed.
+
+                if (msg != null) {
+                    sendMsg(msg);
+                }
+            }
+            //Thread.sleep(delay);
+        }
+    }
 }

@@ -25,32 +25,29 @@ public class ComputeNode extends Node {
         this.msg = new Message(id, this.msg.getSequenceNumber(), System.currentTimeMillis(), payload.toString());
     }
 
-    public void sendMsg(Message msg) {
-        if(msgProbability < rand.nextDouble())
-            return;
+    public void sendMsgThread() {
+        while(true) {
+            if (msgProbability >= rand.nextDouble()) {
+                msg.setLastSender(id);
+                for (Node node : adjacent) {
+                    protocol.sendMsg(msg, node.getId());
+                }
+                nextMsg();
+            }
 
-        protocol.sendMsg(msg);
-
-        msg.setLastSender(id);
-        for(Node node : adjacent) {
-            super.sendMsg(msg, node.getId());
+            //Thread.sleep(delay);
         }
     }
 
-    public void recvMsg(Message msg) {
-        // Mark node receiving
-        boolean collision = addReceiver() > 1;
+    public void recvMsgThread() {
+        while(true) {
+            if (messages.size() > 0) {
+                Message msg = recvMsg();
 
-        super.recvMsg(msg);
-
-        protocol.recvMsg(msg);
-
-        propagationDelay();
-
-        collision = collision || removeReceiver() > 0;
-
-        // Report collision
+                protocol.recvMsg(msg);
+            }
+            //Thread.sleep(delay);
+        }
     }
-
 
 }
