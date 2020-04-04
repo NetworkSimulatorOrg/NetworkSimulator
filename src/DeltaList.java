@@ -25,7 +25,7 @@ public class DeltaList {
     // Waits until first item has expired.
     public void sleep() throws InterruptedException {
         if(list.size() > 0) {
-            Thread.sleep(list.get(0));
+            Thread.sleep(list.get(0) - System.currentTimeMillis());
             synchronized (list) {
                 list.remove(0);
             }

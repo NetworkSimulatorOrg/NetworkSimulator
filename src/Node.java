@@ -66,7 +66,7 @@ public class Node {
 
         if(recv != null) {
             // pass message to recv
-            sleepList.push(System.currentTimeMillis() + (long) (propagationRate * distance) - msg.getTimestamp());
+            sleepList.push((long) (propagationRate * distance) + msg.getTimestamp());
             try {
                 messages.put(msg);
             } catch(InterruptedException e) {
