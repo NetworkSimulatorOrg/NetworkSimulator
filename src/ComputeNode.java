@@ -36,11 +36,19 @@ public class ComputeNode extends Node {
     private void sendMsgThread() {
         while(true) {
             if (msgProbability >= rand.nextDouble()) {
-                msg.setLastSender(id);
-                for (Node node : adjacent) {
-                    protocol.sendMsg(msg, node.getId());
+                if(protocol.sendMsg(msg, adjacent) == ProtocolState.Success) {
+                    setSending(true);
+
+                    try {
+                        Thread.sleep((long) (propagationRate * distance));
+                    } catch (InterruptedException e) {
+                        System.out.println(e);
+                    }
+
+                    setSending(false);
+
+                    nextMsg();
                 }
-                nextMsg();
             }
 
             //Thread.sleep(delay);

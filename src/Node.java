@@ -3,7 +3,8 @@ import java.util.concurrent.SynchronousQueue;
 
 public class Node {
     protected final int id;
-    protected Integer state;
+    private Boolean sending;
+    private Integer receivingCount;
     protected final List<Node> adjacent;
     protected DeltaList sleepList;
     protected SynchronousQueue messages;
@@ -12,27 +13,46 @@ public class Node {
 
     public Node(int id, List<Node> adjacent, double propagationRate, double distance) {
         this.id = id;
+        this.sending = false;
+        this.receivingCount = 0;
         this.adjacent = adjacent;
+        this.sleepList = new DeltaList();
+        this.messages = new SynchronousQueue();
         this.propagationRate = propagationRate;
         this.distance = distance;
     }
 
-    public int getState() {
-        return state;
+    public int getReceivingCount() {
+        return receivingCount;
+    }
+
+    public boolean isSending() {
+        return sending;
+    }
+
+    public boolean setSending(boolean sending) {
+        synchronized (this.sending) {
+            this.sending = sending;
+        }
+        return sending;
+    }
+
+    public boolean isReceiving() {
+        return receivingCount > 0;
     }
 
     public int addReceiver() {
-        synchronized (state) {
-            state++;
+        synchronized (receivingCount) {
+            receivingCount++;
         }
-        return state;
+        return receivingCount;
     }
 
     public int removeReceiver() {
-        synchronized (state) {
-            state--;
+        synchronized (receivingCount) {
+            receivingCount--;
         }
-        return state;
+        return receivingCount;
     }
 
     public int getId() {
@@ -77,12 +97,12 @@ public class Node {
 
     public Message recvMsg() {
         // Mark node receiving
-        boolean collision = addReceiver() > 1;
+        boolean collision = addReceiver() > 1 || isSending();
 
         Message msg = propagationDelay();
 
         // Test at end
-        collision = collision || removeReceiver() > 0;
+        collision = collision || removeReceiver() > 0 || isSending();
 
         if(collision) {
             msg.setCorrupt();
