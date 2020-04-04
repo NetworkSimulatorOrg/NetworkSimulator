@@ -1,11 +1,17 @@
 import java.util.List;
 
 public class ConnectNode extends Node {
+    private Thread receiving;
+
     public ConnectNode(int id, List<Node> adjacent, double propagationRate, double distance) {
         super(id, adjacent, propagationRate, distance);
+
+        // Create necessary threads
+        receiving = new Thread(this::recvMsgThread);
+        receiving.start();
     }
 
-    public void sendMsg(Message msg) {
+    private void sendMsg(Message msg) {
         int lastSender = msg.getLastSender();
         msg.setLastSender(id);
         for(Node node : adjacent) {
@@ -18,10 +24,10 @@ public class ConnectNode extends Node {
     // This is not needed. Messages actually being passed between
     // threads is done in the thread of the sending node. Only 1
     // thread is needed for a connect node.
-    public void sendMsgThread() {
+    private void sendMsgThread() {
     }
 
-    public void recvMsgThread() {
+    private void recvMsgThread() {
         while (true) {
             if (messages.size() > 0) {
                 Message msg = recvMsg();

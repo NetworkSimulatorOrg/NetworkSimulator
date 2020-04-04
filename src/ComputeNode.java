@@ -7,6 +7,8 @@ public class ComputeNode extends Node {
     private Protocol protocol;
     private Message msg;
     private Random rand;
+    private Thread sending;
+    private Thread receiving;
 
     public ComputeNode(int id, List<Node> adjacent, double propagationRate, double distance, double msgProbability, int msgLength, Protocol protocol) {
         super(id, adjacent, propagationRate, distance);
@@ -15,6 +17,12 @@ public class ComputeNode extends Node {
         this.protocol = protocol;
         this.rand = new Random();
         nextMsg();
+
+        // Create necessary threads
+        sending = new Thread(this::sendMsgThread);
+        sending.start();
+        receiving = new Thread(this::recvMsgThread);
+        receiving.start();
     }
 
     private void nextMsg() {
@@ -25,7 +33,7 @@ public class ComputeNode extends Node {
         this.msg = new Message(id, this.msg.getSequenceNumber(), System.currentTimeMillis(), payload.toString());
     }
 
-    public void sendMsgThread() {
+    private void sendMsgThread() {
         while(true) {
             if (msgProbability >= rand.nextDouble()) {
                 msg.setLastSender(id);
@@ -39,7 +47,7 @@ public class ComputeNode extends Node {
         }
     }
 
-    public void recvMsgThread() {
+    private void recvMsgThread() {
         while(true) {
             if (messages.size() > 0) {
                 Message msg = recvMsg();
