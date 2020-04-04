@@ -1,5 +1,7 @@
+import java.util.List;
+
 public interface Protocol {
-    int sendMsg(Message msg, int id);
-    int recvMsg(Message msg);
+    ProtocolState sendMsg(Message msg, List<Node> id);
+    ProtocolState recvMsg(Message msg);
     // int handleCollision(); This is done in the recvMsg and send msg.
 }
