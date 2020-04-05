@@ -39,6 +39,7 @@ public class ComputeNode extends Node {
                 if(protocol.sendMsg(msg, adjacent) == ProtocolState.Success) {
                     setSending(true);
 
+                    // Sleep the sending thread so that it doesn't try to send another until the first one would be received.
                     try {
                         Thread.sleep((long) (propagationRate * distance));
                     } catch (InterruptedException e) {

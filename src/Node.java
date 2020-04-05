@@ -88,7 +88,7 @@ public class Node {
             // pass message to recv
             recv.sleepList.push((long) (propagationRate * distance) + msg.getTimestamp());
             try {
-                messages.put(msg);
+                recv.messages.put(msg);
             } catch(InterruptedException e) {
                 System.out.println(e);
             }
@@ -99,9 +99,10 @@ public class Node {
         // Mark node receiving
         boolean collision = addReceiver() > 1 || isSending();
 
+        // Receiving thread waits to simulate propagation delay
         Message msg = propagationDelay();
 
-        // Test at end
+        // Test for collision at end
         collision = collision || removeReceiver() > 0 || isSending();
 
         if(collision) {
