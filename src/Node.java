@@ -61,9 +61,9 @@ public class Node {
 
     protected Message propagationDelay() {
         try {
+            // Sleep the thread until the first message is ready to send
             sleepList.sleep();
             return (Message) messages.remove();
-            //Thread.sleep(((long) (propagationRate * distance)));
         } catch(InterruptedException e) {
             System.out.print(e);
         }
@@ -86,7 +86,7 @@ public class Node {
 
         if(recv != null) {
             // pass message to recv
-            sleepList.push((long) (propagationRate * distance) + msg.getTimestamp());
+            recv.sleepList.push((long) (propagationRate * distance) + msg.getTimestamp());
             try {
                 messages.put(msg);
             } catch(InterruptedException e) {
