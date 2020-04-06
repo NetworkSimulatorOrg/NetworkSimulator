@@ -12,6 +12,7 @@ public class ConnectNode extends Node {
     }
 
     private void sendMsg(Message msg) {
+        // Send the message to all adjacent nodes besides the one that sent it,
         int lastSender = msg.getLastSender();
         msg.setLastSender(id);
         for(Node node : adjacent) {
@@ -29,6 +30,7 @@ public class ConnectNode extends Node {
 
     private void recvMsgThread() {
         while (true) {
+            // Check if a message is in the queue
             if (messages.size() > 0) {
                 Message msg = recvMsg();
                 // Send out message. Time delay has passed.

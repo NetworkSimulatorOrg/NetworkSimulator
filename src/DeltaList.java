@@ -12,6 +12,7 @@ public class DeltaList {
     }
 
     public synchronized void push(long time) {
+        // Push the time that 
         for(int i = 0; i < list.size(); i++) {
             if(time < list.get(i)) {
                 list.add(i, time);

@@ -16,6 +16,8 @@ public class ComputeNode extends Node {
         this.msgLength = msgLength;
         this.protocol = protocol;
         this.rand = new Random();
+
+        // Immediately start sending a message
         nextMsg();
 
         // Create necessary threads
@@ -26,6 +28,7 @@ public class ComputeNode extends Node {
     }
 
     private void nextMsg() {
+        // The message will just contain the node's unique character repeatedly
         StringBuilder payload = new StringBuilder();
         for(int i = 0; i < msgLength; i++) {
             payload.append(i + 'a');
@@ -35,7 +38,9 @@ public class ComputeNode extends Node {
 
     private void sendMsgThread() {
         while(true) {
+            // Check if the node should send the next message
             if (msgProbability >= rand.nextDouble()) {
+                // Tell the protocol to send the message and check if it sent correctly
                 if(protocol.sendMsg(msg, adjacent) == ProtocolState.Success) {
                     setSending(true);
 
@@ -52,12 +57,14 @@ public class ComputeNode extends Node {
                 }
             }
 
+            // @TODO: Delay some way so that doubles aren't repeatedly being generated.
             //Thread.sleep(delay);
         }
     }
 
     private void recvMsgThread() {
         while(true) {
+            // Check if a message is in the queue
             if (messages.size() > 0) {
                 Message msg = recvMsg();
 

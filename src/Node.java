@@ -88,6 +88,7 @@ public class Node {
             // pass message to recv
             recv.sleepList.push((long) (propagationRate * distance) + msg.getTimestamp());
             try {
+                // Wait until the message has been removed from the queue
                 recv.messages.put(msg);
             } catch(InterruptedException e) {
                 System.out.println(e);
