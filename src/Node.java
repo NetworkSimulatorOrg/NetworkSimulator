@@ -7,7 +7,6 @@ public class Node {
     private Integer receivingCount;
     protected final List<Node> adjacent;
     protected DeltaList sleepList;
-    protected SynchronousQueue messages;
     protected double propagationRate;
     protected double distance;
 
@@ -17,7 +16,6 @@ public class Node {
         this.receivingCount = 0;
         this.adjacent = adjacent;
         this.sleepList = new DeltaList();
-        this.messages = new SynchronousQueue();
         this.propagationRate = propagationRate;
         this.distance = distance;
     }
@@ -60,15 +58,8 @@ public class Node {
     }
 
     protected Message propagationDelay() {
-        try {
-            // Sleep the thread until the first message is ready to send
-            sleepList.sleep();
-            return (Message) messages.remove();
-        } catch(InterruptedException e) {
-            System.out.print(e);
-        }
-
-        return null;
+        // Sleep the thread until the first message is ready to send
+        return sleepList.sleep();
     }
 
     public Node getAdjacentNodeByID(int id) {
@@ -86,16 +77,11 @@ public class Node {
 
         if(recv != null) {
             // pass message to recv
-            recv.sleepList.push((long) (propagationRate * distance) + msg.getTimestamp());
-            try {
-                // Wait until the message has been removed from the queue
-                recv.messages.put(msg);
-            } catch(InterruptedException e) {
-                System.out.println(e);
-            }
+            recv.sleepList.push((long) (propagationRate * distance) + msg.getTimestamp(), msg);
         }
     }
 
+    // Currently unused
     public Message recvMsg() {
         // Mark node receiving
         boolean collision = addReceiver() > 1 || isSending();

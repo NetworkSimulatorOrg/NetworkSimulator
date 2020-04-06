@@ -29,15 +29,12 @@ public class ConnectNode extends Node {
     }
 
     private void recvMsgThread() {
-        while (true) {
+        Message msg = null;
+        while(true) {
             // Check if a message is in the queue
-            if (messages.size() > 0) {
-                Message msg = recvMsg();
-                // Send out message. Time delay has passed.
-
-                if (msg != null) {
-                    sendMsg(msg);
-                }
+            // Send out message. Time delay has passed.
+            if ((msg = sleepList.sleep()) != null) {
+                sendMsg(msg);
             }
             //Thread.sleep(delay);
         }

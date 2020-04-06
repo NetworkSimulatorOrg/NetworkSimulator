@@ -63,11 +63,10 @@ public class ComputeNode extends Node {
     }
 
     private void recvMsgThread() {
+        Message msg = null;
         while(true) {
             // Check if a message is in the queue
-            if (messages.size() > 0) {
-                Message msg = recvMsg();
-
+            if ((msg = sleepList.sleep()) != null) {
                 protocol.recvMsg(msg);
             }
             //Thread.sleep(delay);
