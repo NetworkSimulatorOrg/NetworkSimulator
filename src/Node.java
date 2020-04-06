@@ -120,4 +120,10 @@ public class Node {
         Report report = new Report(type, sender, receiver, msg);
         // Send report to network.
     }
+
+
+
+    public void addAdjacentNode(Node node){
+        adjacent.add(node);
+    }
 }
