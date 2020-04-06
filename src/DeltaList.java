@@ -12,12 +12,10 @@ public class DeltaList {
     }
 
     public synchronized void push(long time) {
+        // Push the time that 
         for(int i = 0; i < list.size(); i++) {
-            if(time > list.get(i)) {
-                time -= list.get(i);
-            } else {
+            if(time < list.get(i)) {
                 list.add(i, time);
-                list.set(i + 1, list.get(i+1) - time);
             }
         }
     }
