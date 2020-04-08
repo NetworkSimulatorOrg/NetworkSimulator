@@ -47,7 +47,7 @@ public class ComputeNode extends Node {
             // Check if the node should send the next message
             if (msgProbability >= rand.nextDouble()) {
                 // Tell the protocol to send the message and check if it sent correctly
-                if(protocol.sendMsg(msg, adjacent) == ProtocolState.Success) {
+                if(protocol.sendMsg(this, msg) == ProtocolState.Success) {
                     setSending(true);
 
                     // Sleep the sending thread so that it doesn't try to send another until the first one would be received.
@@ -73,7 +73,11 @@ public class ComputeNode extends Node {
         while(true) {
             // Check if a message is in the queue
             if ((msg = sleepList.sleep()) != null) {
-                protocol.recvMsg(msg);
+                if(protocol.recvMsg(this, msg) == ProtocolState.Success) {
+                    sendReport(ReportType.Successful, msg, msg.getSender(), getId());
+                } else {
+                    sendReport(ReportType.Collision, msg, msg.getSender(), getId());
+                }
             }
             //Thread.sleep(delay);
         }
