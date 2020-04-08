@@ -27,20 +27,22 @@ public class Report {
         return msg;
     }
 
-    public void logReport(){
+    public void logReport(CSVWriter writer){
         if (type == ReportType.Successful){
-            logSuccessful();
+            logSuccessful(writer);
         }
         else{
-            logCollision();
+            logCollision(writer);
         }
     }
 
-    private void logSuccessful(){
+    private void logSuccessful(CSVWriter writer){
         System.out.println("Node " + receiver + " received the message " + msg.getPayload() + ".");
+        writer.appendDataAsLine("Success", Integer.toString(sender), Integer.toString(receiver), Integer.toString(msg.getSequenceNumber()), msg.getPayload());
     }
 
-    private void logCollision(){
+    private void logCollision(CSVWriter writer){
         System.out.println("Collision: " + msg.getPayload() + " collided when going from Node " + msg.getLastSender() + " to Node " + receiver);
+        writer.appendDataAsLine("Collision", Integer.toString(sender), Integer.toString(receiver), Integer.toString(msg.getSequenceNumber()), msg.getPayload());
     }
 }

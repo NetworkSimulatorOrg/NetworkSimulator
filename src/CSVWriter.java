@@ -15,25 +15,23 @@ public class CSVWriter {
     private boolean fileOpen;
     private ArrayList<String[]> data;
 
-    public CSVWriter(String fileName, boolean lineByLineWrite) {
+    public CSVWriter(String fileName) {
         this.fileName = fileName;
-        this.lineWrite = lineByLineWrite;
-
-        if(lineWrite) {
-            fileOpen = this.openFile();
-        }
+        this.createFile();
     }
 
     public void createFile() {
-        File file = new File(this.fileName);
+        file = new File(this.fileName);
     }
 
     public boolean openFile() {
         if(!fileOpen) {
             try {
                 writer = new PrintWriter(new FileOutputStream(file, true));
+                fileOpen = true;
             } catch (FileNotFoundException e) {
                 System.out.println(e);
+                fileOpen = false;
                 return false;
             }
         }
@@ -51,11 +49,13 @@ public class CSVWriter {
     public void bufferWrite(boolean force) {
         // TODO: what buffer size?
         if(force || data.size() > 20) {
-            data.stream()
-                    .map(this::convertToCSV)
-                    .forEach(writer::println);
+            if(openFile()) {
+                data.stream()
+                        .map(this::convertToCSV)
+                        .forEach(writer::println);
 
-            data.clear();
+                data.clear();
+            }
         }
     }
 

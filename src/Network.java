@@ -7,15 +7,20 @@ public class Network {
     private double propagationDelay, msgProbability;
     private Protocol protocol;
     private List<Node> nodes;
+    public static CSVWriter writer;
     public static Network network;
-    
+
     
     // Arguments: protocol
     public static void main(String[] args){
+        writer = new CSVWriter("csvOutput.csv");
+        writer.openFile();
+
         Protocol protocol = new SlottedAloha(20);
         network = new Network(protocol);
         network.buildNodes();
-        
+
+        writer.closeFile();
     }
 
     public Network(Protocol protocol){
@@ -62,7 +67,7 @@ public class Network {
     }
 
     public void sendReport(Report report){
-        report.logReport();
+        report.logReport(writer);
 
         if (report.getType() == ReportType.Successful){
             // The packet arrived successfully
