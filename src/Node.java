@@ -9,6 +9,7 @@ public class Node {
     protected DeltaList sleepList;
     protected double propagationRate;
     protected double distance;
+    protected long delay = 1000;
 
     public Node(int id, List<Node> adjacent, double propagationRate, double distance) {
         this.id = id;

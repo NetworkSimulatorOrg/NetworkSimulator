@@ -53,7 +53,12 @@ public class ComputeNode extends Node {
             }
 
             // @TODO: Delay some way so that doubles aren't repeatedly being generated until it is lower than the probability.
-            //Thread.sleep(delay);
+            // Delay is hard coded to 1000 milliseconds.
+            try {
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                System.out.println(e);
+            }
         }
     }
 
@@ -68,7 +73,12 @@ public class ComputeNode extends Node {
                     sendReport(ReportType.Collision, msg, msg.getSender(), getId());
                 }
             }
-            //Thread.sleep(delay);
+
+            try {
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                System.out.println(e);
+            }
         }
     }
 
