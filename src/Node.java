@@ -57,6 +57,14 @@ public class Node {
         return id;
     }
 
+    public void sendingDelay() {
+        try {
+            Thread.sleep((long) (propagationRate * distance));
+        } catch (InterruptedException e) {
+            System.out.println(e);
+        }
+    }
+
     protected Message propagationDelay() {
         // Sleep the thread until the first message is ready to send
         return sleepList.sleep();

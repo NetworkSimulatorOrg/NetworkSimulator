@@ -48,17 +48,6 @@ public class ComputeNode extends Node {
             if (msgProbability >= rand.nextDouble()) {
                 // Tell the protocol to send the message and check if it sent correctly
                 if(protocol.sendMsg(this, msg) == ProtocolState.Success) {
-                    setSending(true);
-
-                    // Sleep the sending thread so that it doesn't try to send another until the first one would be received.
-                    try {
-                        Thread.sleep((long) (propagationRate * distance));
-                    } catch (InterruptedException e) {
-                        System.out.println(e);
-                    }
-
-                    setSending(false);
-
                     nextMsg();
                 }
             }
