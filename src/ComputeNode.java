@@ -10,6 +10,8 @@ public class ComputeNode extends Node {
     private Thread sending;
     private Thread receiving;
 
+    private int sequenceNumber;
+
     public ComputeNode(int id, List<Node> adjacent, double propagationRate, double distance, double msgProbability, int msgLength, Protocol protocol) {
         super(id, adjacent, propagationRate, distance);
         this.msgProbability = msgProbability;
@@ -17,7 +19,7 @@ public class ComputeNode extends Node {
         this.protocol = protocol;
         this.rand = new Random();
 
-        // Immediately start sending a message
+        // Prepare the first message sent from the node
         nextMsg();
 
         // Create necessary threads
@@ -25,6 +27,9 @@ public class ComputeNode extends Node {
         sending.start();
         receiving = new Thread(this::recvMsgThread);
         receiving.start();
+
+        // @TODO Figure out how we want to do sequence numbers
+        sequenceNumber = 0;
     }
 
     private void nextMsg() {
@@ -33,7 +38,8 @@ public class ComputeNode extends Node {
         for(int i = 0; i < msgLength; i++) {
             payload.append(i + 'a');
         }
-        this.msg = new Message(id, this.msg.getSequenceNumber(), System.currentTimeMillis(), payload.toString());
+
+        this.msg = new Message(id, this.sequenceNumber++, System.currentTimeMillis(), payload.toString());
     }
 
     private void sendMsgThread() {
@@ -57,7 +63,7 @@ public class ComputeNode extends Node {
                 }
             }
 
-            // @TODO: Delay some way so that doubles aren't repeatedly being generated.
+            // @TODO: Delay some way so that doubles aren't repeatedly being generated until it is lower than the probability.
             //Thread.sleep(delay);
         }
     }
