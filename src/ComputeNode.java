@@ -44,7 +44,8 @@ public class ComputeNode extends Node {
 
     private void sendMsgThread() {
         while(true) {
-            // Check if the node should send the next message
+            // Check if the node should send the next message.
+            // TODO: this probability is different than the probability of sending for a protocol.
             if (msgProbability >= rand.nextDouble()) {
                 // Tell the protocol to send the message and check if it sent correctly
                 if(protocol.sendMsg(this, msg) == ProtocolState.Success) {
