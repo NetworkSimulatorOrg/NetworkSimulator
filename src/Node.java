@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.SynchronousQueue;
 
 public class Node {
     protected final String id;
@@ -11,6 +10,8 @@ public class Node {
     protected double propagationRate;
     protected double distance;
     protected long delay = 1000;
+    protected Thread receivingThread = null;
+    protected Thread sendingThread = null;
 
     public Node(String id, double propagationRate, double distance) {
         this.id = id;
@@ -20,6 +21,15 @@ public class Node {
         this.sleepList = new DeltaList();
         this.propagationRate = propagationRate;
         this.distance = distance;
+    }
+
+    public void terminateThreads() {
+        if(receivingThread != null) {
+            receivingThread.interrupt();
+        }
+        if(sendingThread != null) {
+            sendingThread.interrupt();
+        }
     }
 
     public int getReceivingCount() {

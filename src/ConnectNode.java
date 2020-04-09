@@ -1,14 +1,11 @@
-import java.util.List;
-
 public class ConnectNode extends Node {
-    private Thread receiving;
 
     public ConnectNode(String id, double propagationRate, double distance) {
         super(id, propagationRate, distance);
 
         // Create necessary threads
-        receiving = new Thread(this::recvMsgThread);
-        receiving.start();
+        receivingThread = new Thread(this::recvMsgThread);
+        receivingThread.start();
     }
 
     private void sendMsg(Message msg) {

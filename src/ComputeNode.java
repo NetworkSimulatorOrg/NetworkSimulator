@@ -1,4 +1,3 @@
-import java.util.List;
 import java.util.Random;
 
 public class ComputeNode extends Node {
@@ -7,8 +6,6 @@ public class ComputeNode extends Node {
     private Protocol protocol;
     private Message msg;
     private Random rand;
-    private Thread sending;
-    private Thread receiving;
 
     private int sequenceNumber;
 
@@ -23,10 +20,10 @@ public class ComputeNode extends Node {
         nextMsg();
 
         // Create necessary threads
-        sending = new Thread(this::sendMsgThread);
-        sending.start();
-        receiving = new Thread(this::recvMsgThread);
-        receiving.start();
+        sendingThread = new Thread(this::sendMsgThread);
+        sendingThread.start();
+        receivingThread = new Thread(this::recvMsgThread);
+        receivingThread.start();
 
         // @TODO Figure out how we want to do sequence numbers
         sequenceNumber = 0;
