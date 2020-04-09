@@ -1,12 +1,12 @@
 public class Message {
-    private final int sender;
+    private final String sender;
+    private String lastSender;
     private final int sequenceNumber;
     private long timestamp;
-    private int lastSender;
     private final String payload;
     private boolean corrupt;
 
-    public Message(int sender, int sequenceNumber, long timestamp, String payload) {
+    public Message(String sender, int sequenceNumber, long timestamp, String payload) {
         this.sender = sender;
         this.lastSender = sender;
         this.sequenceNumber = sequenceNumber;
@@ -15,15 +15,15 @@ public class Message {
         this.corrupt = false;
     }
 
-    public int getSender() {
+    public String getSender() {
         return sender;
     }
 
-    public int getLastSender() {
+    public String getLastSender() {
         return lastSender;
     }
 
-    public void setLastSender(int sender) {
+    public void setLastSender(String sender) {
         this.lastSender = sender;
     }
 

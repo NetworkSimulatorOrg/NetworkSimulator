@@ -12,8 +12,8 @@ public class ComputeNode extends Node {
 
     private int sequenceNumber;
 
-    public ComputeNode(int id, List<Node> adjacent, double propagationRate, double distance, double msgProbability, int msgLength, Protocol protocol) {
-        super(id, adjacent, propagationRate, distance);
+    public ComputeNode(String id, double propagationRate, double distance, double msgProbability, int msgLength, Protocol protocol) {
+        super(id, propagationRate, distance);
         this.msgProbability = msgProbability;
         this.msgLength = msgLength;
         this.protocol = protocol;

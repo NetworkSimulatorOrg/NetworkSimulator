@@ -35,15 +35,11 @@ public class Network {
         this.protocol = protocol;
     }
 
-    public Node getNodeById(int id) {
+    public Node getNodeById(String id) {
         // Optimize for the case that nodes are saved in index order.
-        if(nodes.size() > id && nodes.get(id).getId() == id) {
-            return nodes.get(id);
-        } else {
-            for (int i = 0; i < nodes.size(); i++) {
-                if (nodes.get(i).getId() == id) {
-                    return nodes.get(i);
-                }
+        for (int i = 0; i < nodes.size(); i++) {
+            if (nodes.get(i).getId().equals(id)) {
+                return nodes.get(i);
             }
         }
         System.out.println("No node found with id: " + id);
@@ -58,10 +54,10 @@ public class Network {
     private void buildNode(String[] line) {
         Node node;
         if(line[0].toUpperCase().equals("CONNECT")) {
-            node = new ConnectNode(Integer.parseInt(line[1]), new ArrayList<Node>(), propagationDelay, distance);
+            node = new ConnectNode(line[1], propagationDelay, distance);
             nodes.add(node);
         } else if(line[0].toUpperCase().equals("COMPUTE")) {
-            node = new ComputeNode(Integer.parseInt(line[1]), new ArrayList<Node>(), propagationDelay, distance, msgProbability, msgLength, protocol);
+            node = new ComputeNode(line[1], propagationDelay, distance, msgProbability, msgLength, protocol);
             nodes.add(node);
         } else {
             System.out.println("Unrecognized node type: " + line[0]);
@@ -70,10 +66,10 @@ public class Network {
 
     // Add adjacent nodes to the node's adjacency list.
     private void addAdjacentNodes(String[] line) {
-        Node node = this.getNodeById(Integer.parseInt(line[1]));
+        Node node = this.getNodeById(line[1]);
 
         for(int i = 2; i < line.length; i++) {
-            node.addAdjacentNode(this.getNodeById(Integer.parseInt(line[i])));
+            node.addAdjacentNode(this.getNodeById(line[i]));
         }
     }
 
@@ -98,41 +94,6 @@ public class Network {
         for(var line : lines) {
             addAdjacentNodes(line);
         }
-    }
-
-    private void buildNodes(){
-        // Hardcoding a node layout to test the protocols on
-
-        int id = 0;
-        nodes = new ArrayList<>();
-
-        for(; id < 3; id++){
-            nodes.add(new ConnectNode(id, new ArrayList<Node>(), propagationDelay, distance));
-        }
-
-        for(; id < 9; id++){
-            List<Node> adjacent = new ArrayList<>();
-            // 2 connected to node 0. 2 connected to node 1. 2 connected to node 2.
-            adjacent.add(nodes.get((id-3)/2));
-            nodes.add(new ComputeNode(id, adjacent, propagationDelay, distance, msgProbability, msgLength, protocol));
-        }
-
-        nodeCount = id;
-
-        // Add the adjacent nodes to the Connect Nodes
-        
-        nodes.get(0).addAdjacentNode(nodes.get(1));
-        nodes.get(0).addAdjacentNode(nodes.get(3));
-        nodes.get(0).addAdjacentNode(nodes.get(4));
-
-        nodes.get(1).addAdjacentNode(nodes.get(0));
-        nodes.get(1).addAdjacentNode(nodes.get(2));
-        nodes.get(1).addAdjacentNode(nodes.get(5));
-        nodes.get(1).addAdjacentNode(nodes.get(6));
-
-        nodes.get(2).addAdjacentNode(nodes.get(1));
-        nodes.get(2).addAdjacentNode(nodes.get(7));
-        nodes.get(2).addAdjacentNode(nodes.get(8));
     }
 
     public void sendReport(Report report){

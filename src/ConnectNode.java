@@ -3,8 +3,8 @@ import java.util.List;
 public class ConnectNode extends Node {
     private Thread receiving;
 
-    public ConnectNode(int id, List<Node> adjacent, double propagationRate, double distance) {
-        super(id, adjacent, propagationRate, distance);
+    public ConnectNode(String id, double propagationRate, double distance) {
+        super(id, propagationRate, distance);
 
         // Create necessary threads
         receiving = new Thread(this::recvMsgThread);
@@ -13,7 +13,7 @@ public class ConnectNode extends Node {
 
     private void sendMsg(Message msg) {
         // Send the message to all adjacent nodes besides the one that sent it,
-        int lastSender = msg.getLastSender();
+        var lastSender = msg.getLastSender();
         msg.setLastSender(id);
         for(Node node : adjacent) {
             if (node.getId() != lastSender) {

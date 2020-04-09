@@ -1,8 +1,9 @@
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.SynchronousQueue;
 
 public class Node {
-    protected final int id;
+    protected final String id;
     private Boolean sending;
     private Integer receivingCount;
     protected final List<Node> adjacent;
@@ -11,11 +12,11 @@ public class Node {
     protected double distance;
     protected long delay = 1000;
 
-    public Node(int id, List<Node> adjacent, double propagationRate, double distance) {
+    public Node(String id, double propagationRate, double distance) {
         this.id = id;
         this.sending = false;
         this.receivingCount = 0;
-        this.adjacent = adjacent;
+        this.adjacent = new ArrayList<>();
         this.sleepList = new DeltaList();
         this.propagationRate = propagationRate;
         this.distance = distance;
@@ -54,7 +55,7 @@ public class Node {
         return receivingCount;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
@@ -71,9 +72,9 @@ public class Node {
         return sleepList.sleep();
     }
 
-    public Node getAdjacentNodeByID(int id) {
+    public Node getAdjacentNodeByID(String id) {
         for(int i = 0; i < adjacent.size(); i++) {
-            if(adjacent.get(i).getId() == id) {
+            if(adjacent.get(i).getId().equals(id)) {
                 return adjacent.get(i);
             }
         }
@@ -81,7 +82,7 @@ public class Node {
     }
 
     // Finds node, and passes the message to the node's synchronized queue.
-    public void sendMsg(Message msg, int receiver) {
+    public void sendMsg(Message msg, String receiver) {
         Node recv = getAdjacentNodeByID(receiver);
 
         if(recv != null) {
@@ -111,7 +112,7 @@ public class Node {
         return msg;
     }
 
-    public void sendReport(ReportType type, Message msg, int sender, int receiver) {
+    public void sendReport(ReportType type, Message msg, String sender, String receiver) {
         Report report = new Report(type, sender, receiver, msg);
         // Send report to network.
         Network.network.sendReport(report);
