@@ -69,12 +69,8 @@ public class Node {
         return id;
     }
 
-    public void sendingDelay() {
-        try {
-            Thread.sleep((long) (propagationRate * distance));
-        } catch (InterruptedException e) {
-            System.out.println(e);
-        }
+    public void sendingDelay() throws InterruptedException {
+         Thread.sleep((long) (propagationRate * distance));
     }
 
     protected Message propagationDelay() {

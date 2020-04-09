@@ -8,7 +8,7 @@ public interface Protocol {
      * Handles collisions if protocol specifies.
      * Returns when done sending
      */
-    ProtocolState sendMsg(Node node, Message msg);
+    ProtocolState sendMsg(Node node, Message msg) throws InterruptedException;
     /*
      * Takes in sending node, the message received
      * The propagation delay has already occurred to receive the message,
@@ -18,4 +18,6 @@ public interface Protocol {
      * Returns ERROR if an error occured.
      */
     ProtocolState recvMsg(Node node, Message msg);
+
+    ProtocolState terminateThreads();
 }

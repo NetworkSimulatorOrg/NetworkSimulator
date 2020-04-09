@@ -1,6 +1,6 @@
 public class Aloha implements Protocol {
     @Override
-    public ProtocolState sendMsg(Node node, Message msg) {
+    public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
         // Handle node state
         node.setSending(true);
 
@@ -25,5 +25,10 @@ public class Aloha implements Protocol {
         if(msg.isCorrupt())
             return ProtocolState.Failure;
         return ProtocolState.Success;
+    }
+
+    @Override
+    public ProtocolState terminateThreads() {
+        return null;
     }
 }

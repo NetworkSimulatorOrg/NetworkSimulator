@@ -16,30 +16,34 @@ public class SlottedAloha extends Aloha implements Protocol{
 
     private void synchronizeThread() {
         // After waiting
-        while(true) {
+        var run = true;
+        while(run) {
             sync.notifyAll();
 
             try {
                 Thread.sleep(frameSize * 100);
             } catch (InterruptedException e) {
-                System.out.println(e);
+                run = false;
             }
         }
     }
 
     // @TODO
-    public ProtocolState sendMsg(Node node, Message msg){
-        try {
-            sync.wait();
-            return super.sendMsg(node, msg);
-        } catch (InterruptedException e) {
-            System.out.println(e);
-        }
-        return ProtocolState.Error;
+    public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
+        sync.wait();
+        return super.sendMsg(node, msg);
     }
 
     // @TODO
     public ProtocolState recvMsg(Node node, Message msg){
         return super.recvMsg(node, msg);
+    }
+
+    @Override
+    public ProtocolState terminateThreads() {
+        if(synchroning != null) {
+            synchroning.interrupt();
+        }
+        return ProtocolState.Success;
     }
 }
