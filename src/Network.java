@@ -1,3 +1,8 @@
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +34,71 @@ public class Network {
         propagationDelay = 20;
         msgProbability = 1;
         this.protocol = protocol;
+    }
+
+    public Node getNodeById(int index) {
+        // Optimize for the case that nodes are saved in index order.
+        if(nodes.get(index).getId() == index) {
+            return nodes.get(index);
+        } else {
+            for (int i = 0; i < nodes.size(); i++) {
+                if (nodes.get(i).getId() == index) {
+                    return nodes.get(i);
+                }
+            }
+        }
+        System.out.println("No node found with id: " + index);
+        return null;
+    }
+
+    private String[] parseLine(String line) {
+        return line.split("[:, ][ ]*");
+    }
+
+    // Create a node of the proper type with id.
+    private void buildNode(String[] line) {
+        Node node;
+        if(line[0].toUpperCase() == "CONNECT") {
+            node = new ConnectNode(Integer.parseInt(line[1]), new ArrayList<Node>(), propagationDelay, distance);
+            nodes.add(node);
+        } else if(line[0].toUpperCase() == "COMPUTE") {
+            node = new ComputeNode(Integer.parseInt(line[1]), new ArrayList<Node>(), propagationDelay, distance, msgProbability, msgLength, protocol);
+            nodes.add(node);
+        } else {
+            System.out.println("Unrecognized node type: " + line[0]);
+        }
+    }
+
+    // Add adjacent nodes to the node's adjacency list.
+    private void addAdjacentNodes(String[] line) {
+        Node node = this.getNodeById(Integer.parseInt(line[1]));
+
+        for(int i = 2; i < line.length; i++) {
+            node.addAdjacentNode(this.getNodeById(i));
+        }
+    }
+
+    public void buildNodesFromFile(String file) {
+        // https://www.journaldev.com/709/java-read-file-line-by-line
+        var lines = new ArrayList<String[]>();
+        try{
+            var reader = new BufferedReader(new FileReader(file));
+            String line = reader.readLine();
+            while(line != null) {
+                lines.add(parseLine(line));
+                line = reader.readLine();
+            }
+            reader.close();
+        } catch(IOException e) {
+            System.out.println(e);
+        }
+
+        for(var line : lines) {
+            buildNode(line);
+        }
+        for(var line : lines) {
+            addAdjacentNodes(line);
+        }
     }
 
     private void buildNodes(){
