@@ -17,6 +17,7 @@ public class CSVWriter {
 
     public CSVWriter(String fileName) {
         this.fileName = fileName;
+        this.data = new ArrayList<>();
         this.createFile();
     }
 
@@ -48,7 +49,7 @@ public class CSVWriter {
 
     public void bufferWrite(boolean force) {
         // TODO: what buffer size?
-        if(force || data.size() > 20) {
+        if((force && data.size() > 0) || data.size() > 20) {
             if(openFile()) {
                 data.stream()
                         .map(this::convertToCSV)
