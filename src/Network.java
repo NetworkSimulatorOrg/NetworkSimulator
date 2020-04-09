@@ -1,8 +1,6 @@
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,9 +19,9 @@ public class Network {
         writer = new CSVWriter("csvOutput.csv");
         writer.openFile();
 
-        Protocol protocol = new SlottedAloha(20);
+        Protocol protocol = new Aloha();
         network = new Network(protocol);
-        network.buildNodes();
+        network.buildNodesFromFile("network-description.txt");
 
         writer.closeFile();
     }
@@ -33,21 +31,22 @@ public class Network {
         distance = 5;
         propagationDelay = 20;
         msgProbability = 1;
+        nodes = new ArrayList<>();
         this.protocol = protocol;
     }
 
-    public Node getNodeById(int index) {
+    public Node getNodeById(int id) {
         // Optimize for the case that nodes are saved in index order.
-        if(nodes.get(index).getId() == index) {
-            return nodes.get(index);
+        if(nodes.size() > id && nodes.get(id).getId() == id) {
+            return nodes.get(id);
         } else {
             for (int i = 0; i < nodes.size(); i++) {
-                if (nodes.get(i).getId() == index) {
+                if (nodes.get(i).getId() == id) {
                     return nodes.get(i);
                 }
             }
         }
-        System.out.println("No node found with id: " + index);
+        System.out.println("No node found with id: " + id);
         return null;
     }
 
@@ -58,10 +57,10 @@ public class Network {
     // Create a node of the proper type with id.
     private void buildNode(String[] line) {
         Node node;
-        if(line[0].toUpperCase() == "CONNECT") {
+        if(line[0].toUpperCase().equals("CONNECT")) {
             node = new ConnectNode(Integer.parseInt(line[1]), new ArrayList<Node>(), propagationDelay, distance);
             nodes.add(node);
-        } else if(line[0].toUpperCase() == "COMPUTE") {
+        } else if(line[0].toUpperCase().equals("COMPUTE")) {
             node = new ComputeNode(Integer.parseInt(line[1]), new ArrayList<Node>(), propagationDelay, distance, msgProbability, msgLength, protocol);
             nodes.add(node);
         } else {
@@ -74,7 +73,7 @@ public class Network {
         Node node = this.getNodeById(Integer.parseInt(line[1]));
 
         for(int i = 2; i < line.length; i++) {
-            node.addAdjacentNode(this.getNodeById(i));
+            node.addAdjacentNode(this.getNodeById(Integer.parseInt(line[i])));
         }
     }
 
