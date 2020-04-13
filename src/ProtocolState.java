@@ -1,3 +1,3 @@
 public enum ProtocolState {
-    Success, Error, Fail
+    Success, Error, Failure
 }

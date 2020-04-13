@@ -1,19 +1,16 @@
-import java.util.List;
-
 public class ConnectNode extends Node {
-    private Thread receiving;
 
-    public ConnectNode(int id, List<Node> adjacent, double propagationRate, double distance) {
-        super(id, adjacent, propagationRate, distance);
+    public ConnectNode(String id, double propagationRate, double distance) {
+        super(id, propagationRate, distance);
 
         // Create necessary threads
-        receiving = new Thread(this::recvMsgThread);
-        receiving.start();
+        receivingThread = new Thread(this::recvMsgThread);
+        receivingThread.start();
     }
 
     private void sendMsg(Message msg) {
         // Send the message to all adjacent nodes besides the one that sent it,
-        int lastSender = msg.getLastSender();
+        var lastSender = msg.getLastSender();
         msg.setLastSender(id);
         for(Node node : adjacent) {
             if (node.getId() != lastSender) {
@@ -29,17 +26,20 @@ public class ConnectNode extends Node {
     }
 
     private void recvMsgThread() {
-        while (true) {
+        Message msg = null;
+        var run = true;
+        while(run) {
             // Check if a message is in the queue
-            if (messages.size() > 0) {
-                Message msg = recvMsg();
-                // Send out message. Time delay has passed.
-
-                if (msg != null) {
+            // Send out message. Time delay has passed.
+            try {
+                if ((msg = sleepList.sleep()) != null) {
                     sendMsg(msg);
                 }
+
+                Thread.sleep(delay);
+            } catch(InterruptedException e) {
+                run = false;
             }
-            //Thread.sleep(delay);
         }
     }
 }

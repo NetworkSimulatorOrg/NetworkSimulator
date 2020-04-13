@@ -1,4 +1,3 @@
-import java.util.List;
 import java.util.Random;
 
 public class ComputeNode extends Node {
@@ -7,13 +6,11 @@ public class ComputeNode extends Node {
     private Protocol protocol;
     private Message msg;
     private Random rand;
-    private Thread sending;
-    private Thread receiving;
 
     private int sequenceNumber;
 
-    public ComputeNode(int id, List<Node> adjacent, double propagationRate, double distance, double msgProbability, int msgLength, Protocol protocol) {
-        super(id, adjacent, propagationRate, distance);
+    public ComputeNode(String id, double propagationRate, double distance, double msgProbability, int msgLength, Protocol protocol) {
+        super(id, propagationRate, distance);
         this.msgProbability = msgProbability;
         this.msgLength = msgLength;
         this.protocol = protocol;
@@ -23,10 +20,10 @@ public class ComputeNode extends Node {
         nextMsg();
 
         // Create necessary threads
-        sending = new Thread(this::sendMsgThread);
-        sending.start();
-        receiving = new Thread(this::recvMsgThread);
-        receiving.start();
+        sendingThread = new Thread(this::sendMsgThread);
+        sendingThread.start();
+        receivingThread = new Thread(this::recvMsgThread);
+        receivingThread.start();
 
         // @TODO Figure out how we want to do sequence numbers
         sequenceNumber = 0;
@@ -43,40 +40,45 @@ public class ComputeNode extends Node {
     }
 
     private void sendMsgThread() {
-        while(true) {
-            // Check if the node should send the next message
-            if (msgProbability >= rand.nextDouble()) {
-                // Tell the protocol to send the message and check if it sent correctly
-                if(protocol.sendMsg(msg, adjacent) == ProtocolState.Success) {
-                    setSending(true);
-
-                    // Sleep the sending thread so that it doesn't try to send another until the first one would be received.
-                    try {
-                        Thread.sleep((long) (propagationRate * distance));
-                    } catch (InterruptedException e) {
-                        System.out.println(e);
+        var run = true;
+        while(run) {
+            try {
+                // Check if the node should send the next message.
+                // TODO: this probability is different than the probability of sending for a protocol.
+                if (msgProbability >= rand.nextDouble()) {
+                    // Tell the protocol to send the message and check if it sent correctly
+                    if (protocol.sendMsg(this, msg) == ProtocolState.Success) {
+                        nextMsg();
                     }
-
-                    setSending(false);
-
-                    nextMsg();
                 }
-            }
 
-            // @TODO: Delay some way so that doubles aren't repeatedly being generated until it is lower than the probability.
-            //Thread.sleep(delay);
+                // @TODO: Delay some way so that doubles aren't repeatedly being generated until it is lower than the probability.
+                // Delay is hard coded to 1000 milliseconds.
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                run = false;
+            }
         }
     }
 
     private void recvMsgThread() {
-        while(true) {
-            // Check if a message is in the queue
-            if (messages.size() > 0) {
-                Message msg = recvMsg();
+        Message msg = null;
+        var run = true;
+        while(run) {
+            try {
+                // Check if a message is in the queue
+                if ((msg = sleepList.sleep()) != null) {
+                    if (protocol.recvMsg(this, msg) == ProtocolState.Success) {
+                        sendReport(ReportType.Successful, msg, msg.getSender(), getId());
+                    } else {
+                        sendReport(ReportType.Collision, msg, msg.getSender(), getId());
+                    }
+                }
 
-                protocol.recvMsg(msg);
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                run = false;
             }
-            //Thread.sleep(delay);
         }
     }
 

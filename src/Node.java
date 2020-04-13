@@ -1,25 +1,35 @@
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.SynchronousQueue;
 
 public class Node {
-    protected final int id;
+    protected final String id;
     private Boolean sending;
     private Integer receivingCount;
     protected final List<Node> adjacent;
     protected DeltaList sleepList;
-    protected SynchronousQueue messages;
     protected double propagationRate;
     protected double distance;
+    protected long delay = 1000;
+    protected Thread receivingThread = null;
+    protected Thread sendingThread = null;
 
-    public Node(int id, List<Node> adjacent, double propagationRate, double distance) {
+    public Node(String id, double propagationRate, double distance) {
         this.id = id;
         this.sending = false;
         this.receivingCount = 0;
-        this.adjacent = adjacent;
+        this.adjacent = new ArrayList<>();
         this.sleepList = new DeltaList();
-        this.messages = new SynchronousQueue();
         this.propagationRate = propagationRate;
         this.distance = distance;
+    }
+
+    public void terminateThreads() {
+        if(receivingThread != null) {
+            receivingThread.interrupt();
+        }
+        if(sendingThread != null) {
+            sendingThread.interrupt();
+        }
     }
 
     public int getReceivingCount() {
@@ -55,25 +65,22 @@ public class Node {
         return receivingCount;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    protected Message propagationDelay() {
-        try {
-            // Sleep the thread until the first message is ready to send
-            sleepList.sleep();
-            return (Message) messages.remove();
-        } catch(InterruptedException e) {
-            System.out.print(e);
-        }
-
-        return null;
+    public void sendingDelay() throws InterruptedException {
+         Thread.sleep((long) (propagationRate * distance));
     }
 
-    public Node getAdjacentNodeByID(int id) {
+    protected Message propagationDelay() {
+        // Sleep the thread until the first message is ready to send
+        return sleepList.sleep();
+    }
+
+    public Node getAdjacentNodeByID(String id) {
         for(int i = 0; i < adjacent.size(); i++) {
-            if(adjacent.get(i).getId() == id) {
+            if(adjacent.get(i).getId().equals(id)) {
                 return adjacent.get(i);
             }
         }
@@ -81,21 +88,16 @@ public class Node {
     }
 
     // Finds node, and passes the message to the node's synchronized queue.
-    public void sendMsg(Message msg, int receiver) {
+    public void sendMsg(Message msg, String receiver) {
         Node recv = getAdjacentNodeByID(receiver);
 
         if(recv != null) {
             // pass message to recv
-            recv.sleepList.push((long) (propagationRate * distance) + msg.getTimestamp());
-            try {
-                // Wait until the message has been removed from the queue
-                recv.messages.put(msg);
-            } catch(InterruptedException e) {
-                System.out.println(e);
-            }
+            recv.sleepList.push((long) (propagationRate * distance) + msg.getTimestamp(), msg);
         }
     }
 
+    // Currently unused
     public Message recvMsg() {
         // Mark node receiving
         boolean collision = addReceiver() > 1 || isSending();
@@ -116,7 +118,7 @@ public class Node {
         return msg;
     }
 
-    public void sendReport(ReportType type, Message msg, int sender, int receiver) {
+    public void sendReport(ReportType type, Message msg, String sender, String receiver) {
         Report report = new Report(type, sender, receiver, msg);
         // Send report to network.
         Network.network.sendReport(report);
