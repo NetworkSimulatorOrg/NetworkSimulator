@@ -97,7 +97,7 @@ public class Node {
 
         if(recv != null) {
             // pass message to recv
-            System.out.println("Node " + getId() + " sending " + msg.getPayload() + " to node " + recv.getId());
+            //System.out.println("Node " + getId() + " sending " + msg.getPayload() + " to node " + recv.getId());
 
             // Set the timestamp at which the message would be received
             msg.setTimestamp(System.currentTimeMillis());

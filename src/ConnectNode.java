@@ -12,11 +12,22 @@ public class ConnectNode extends Node {
         // Send the message to all adjacent nodes besides the one that sent it,
         var lastSender = msg.getLastSender();
         msg.setLastSender(id);
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("Connect ");
+        builder.append(getId());
+        builder.append(": Repeating message\n");
+        builder.append(msg.toString("\t"));
+
         for(Node node : adjacent) {
             if (!node.getId().equals(lastSender)) {
                 super.sendMsg(msg, node.getId());
+                builder.append("\t To ");
+                builder.append(node.getId());
+                builder.append("\n");
             }
         }
+        System.out.println(builder.toString());
     }
 
     // This is not needed. Messages actually being passed between
@@ -33,7 +44,6 @@ public class ConnectNode extends Node {
             try {
                 if ((msg = sleepList.sleep()) != null) {
                     // Send out message. Time delay has passed.
-                    System.out.println("Node " + getId() + " received the message: " + msg.getPayload());
                     sendMsg(msg);
                 }
 
@@ -42,5 +52,7 @@ public class ConnectNode extends Node {
                 run = false;
             }
         }
+
+        System.out.println("Node " + getId() + " terminating recvMsgThread");
     }
 }

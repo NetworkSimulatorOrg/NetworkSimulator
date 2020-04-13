@@ -57,7 +57,6 @@ public class ComputeNode extends Node {
                 // TODO: this probability is different than the probability of sending for a protocol.
                 // I don't think that this is needed because the protocol should take care of this
                 //if (msgProbability >= rand.nextDouble()) {
-                    System.out.println("Sending Message: " + sendingMsg.getPayload());
                     // Tell the protocol to send the message and check if it sent correctly
                     if (protocol.sendMsg(this, sendingMsg) == ProtocolState.Success) {
                         nextMsg();
@@ -71,6 +70,7 @@ public class ComputeNode extends Node {
                 run = false;
             }
         }
+        System.out.println("Node " + getId() + " terminating sendMsgThread");
     }
 
     private void recvMsgThread() {
@@ -80,6 +80,7 @@ public class ComputeNode extends Node {
             try {
                 // Check if a message is in the queue
                 if ((msg = sleepList.sleep()) != null) {
+                    System.out.println("Compute " + getId() + ": Receiving message\n" + sendingMsg.toString("\t"));
                     if (protocol.recvMsg(this, msg) == ProtocolState.Success) {
                         sendReport(ReportType.Successful, msg, msg.getSender(), getId());
                     } else {
@@ -96,6 +97,7 @@ public class ComputeNode extends Node {
                 run = false;
             }
         }
+        System.out.println("Node " + getId() + " terminating recvMsgThread");
     }
 
     public void setSendingCorrupt(){

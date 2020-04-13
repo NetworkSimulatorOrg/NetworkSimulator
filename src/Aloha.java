@@ -9,16 +9,28 @@
 public class Aloha implements Protocol {
     @Override
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
-        
+
         // Keep resending the message until there is no collision
         while (true){
             // Handle node state
             node.setSending(true);
 
+            StringBuilder builder = new StringBuilder();
+            builder.append("Compute ");
+            builder.append(node.getId());
+            builder.append(": Generating message\n");
+            builder.append(msg.toString("\t"));
+
             // Send to all nodes
             for(Node adjacent : node.adjacent) {
                 node.sendMsg(msg, adjacent.getId());
+                builder.append("\t To ");
+                builder.append(adjacent.getId());
+                builder.append("\n");
             }
+
+            System.out.println(builder.toString());
+
 
             // Sleep the sending thread so that it doesn't try to send another until the first one would be received by every node.
             node.sendingDelay();
