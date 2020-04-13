@@ -11,7 +11,6 @@ public class SlottedAloha extends Aloha implements Protocol{
         sync = new Object();
 
         synchroning = new Thread(this::synchronizeThread);
-        synchroning.start();
     }
 
     private void synchronizeThread() {
@@ -37,6 +36,12 @@ public class SlottedAloha extends Aloha implements Protocol{
     // @TODO
     public ProtocolState recvMsg(Node node, Message msg){
         return super.recvMsg(node, msg);
+    }
+
+    @Override
+    public ProtocolState run() {
+        synchroning.start();
+        return ProtocolState.Success;
     }
 
     @Override

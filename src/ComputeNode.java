@@ -21,9 +21,7 @@ public class ComputeNode extends Node {
 
         // Create necessary threads
         sendingThread = new Thread(this::startSendMsgThread);
-        sendingThread.start();
         receivingThread = new Thread(this::recvMsgThread);
-        receivingThread.start();
 
         // @TODO Figure out how we want to do sequence numbers
         this.sequenceNumber = 0;
@@ -57,7 +55,6 @@ public class ComputeNode extends Node {
                 // TODO: this probability is different than the probability of sending for a protocol.
                 // I don't think that this is needed because the protocol should take care of this
                 //if (msgProbability >= rand.nextDouble()) {
-                    System.out.println("Sending Message: " + sendingMsg.getPayload());
                     // Tell the protocol to send the message and check if it sent correctly
                     if (protocol.sendMsg(this, sendingMsg) == ProtocolState.Success) {
                         nextMsg();
@@ -67,19 +64,21 @@ public class ComputeNode extends Node {
                 // TODO: Delay some way so that doubles aren't repeatedly being generated until it is lower than the probability. This depends on Protocol
                 // Delay is hard coded to 1000 milliseconds.
                 Thread.sleep(delay);
-            } catch (InterruptedException e) {
+            } catch (/*Interrupted*/Exception e) {
                 run = false;
             }
         }
+        System.out.println("Node " + getId() + " terminating sendMsgThread");
     }
 
     private void recvMsgThread() {
         Message msg = null;
-        var run = true;
-        while(run) {
+        sendingRunning = true;
+        while(sendingRunning) {
             try {
                 // Check if a message is in the queue
                 if ((msg = sleepList.sleep()) != null) {
+                    System.out.println("Compute " + getId() + ": Receiving message\n" + sendingMsg.toString("\t"));
                     if (protocol.recvMsg(this, msg) == ProtocolState.Success) {
                         sendReport(ReportType.Successful, msg, msg.getSender(), getId());
                     } else {
@@ -93,9 +92,10 @@ public class ComputeNode extends Node {
 
                 //Thread.sleep(delay);
             } catch (/*Interrupted*/Exception e) {
-                run = false;
+                sendingRunning = false;
             }
         }
+        System.out.println("Node " + getId() + " terminating recvMsgThread");
     }
 
     public void setSendingCorrupt(){

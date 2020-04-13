@@ -17,5 +17,6 @@ public interface Protocol {
      */
     ProtocolState recvMsg(Node node, Message msg);
 
+    ProtocolState run();
     ProtocolState terminateThreads();
 }
