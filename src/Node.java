@@ -13,6 +13,8 @@ public class Node {
     protected long delay = 1000;
     protected Thread receivingThread = null;
     protected Thread sendingThread = null;
+    protected volatile boolean receivingRunning = false;
+    protected volatile boolean sendingRunning = false;
 
     public Node(String id, double propagationRate, double distance) {
         this.id = id;
@@ -25,6 +27,15 @@ public class Node {
         this.longestDistance = distance;
     }
 
+    public void run() {
+        if(receivingThread != null) {
+            receivingThread.start();
+        }
+        if(sendingThread != null) {
+            sendingThread.start();
+        }
+    }
+
     public void terminateThreads() {
         if(receivingThread != null) {
             receivingThread.interrupt();
@@ -32,6 +43,8 @@ public class Node {
         if(sendingThread != null) {
             sendingThread.interrupt();
         }
+        receivingRunning = false;
+        sendingRunning = false;
     }
 
     public int getReceivingCount() {
@@ -77,7 +90,7 @@ public class Node {
          Thread.sleep((long) (propagationRate * longestDistance * 1.1));
     }
 
-    protected Message propagationDelay() {
+    protected Message propagationDelay() throws InterruptedException {
         // Sleep the thread until the first message is ready to send
         return sleepList.sleep();
     }
@@ -103,27 +116,6 @@ public class Node {
             msg.setTimestamp(System.currentTimeMillis());
             recv.sleepList.push((long) (propagationRate * distance) + msg.getTimestamp(), msg.clone());
         }
-    }
-
-    // Currently unused
-    public Message recvMsg() {
-        // Mark node receiving
-        boolean collision = addReceiver() > 1 || isSending();
-
-        // Receiving thread waits to simulate propagation delay
-        Message msg = propagationDelay();
-
-        // Test for collision at end
-        collision = collision || removeReceiver() > 0 || isSending();
-
-        if(collision) {
-            msg.setCorrupt();
-            sendReport(ReportType.Collision, msg, msg.getSender(), id);
-        } else {
-            sendReport(ReportType.Successful, msg, msg.getSender(), id);
-        }
-
-        return msg;
     }
 
     public void sendReport(ReportType type, Message msg, String sender, String receiver) {

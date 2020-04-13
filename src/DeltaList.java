@@ -9,8 +9,8 @@ public class DeltaList {
     private List<Message> msgs;
 
     public DeltaList() {
-        list = Collections.synchronizedList(new ArrayList<>());
-        msgs = Collections.synchronizedList(new ArrayList<>());
+        list = new ArrayList<>();
+        msgs = new ArrayList<>();
     }
 
     public synchronized void push(long time, Message msg) {
@@ -34,16 +34,12 @@ public class DeltaList {
     }
 
     // Waits until first item has expired.
-    public synchronized Message sleep() {
+    public synchronized Message sleep() throws InterruptedException {
         if(list.size() > 0) {
-            try {
-                System.out.println("Message " + msgs.get(0).getPayload() + " found in queue.");
-                System.out.println("Sleeping for " + (list.get(0) - System.currentTimeMillis()) + " milliseconds");
-                if (list.get(0) - System.currentTimeMillis() > 0){
-                    Thread.sleep(list.get(0) - System.currentTimeMillis());
-                }
-            } catch (InterruptedException e) {
-                System.out.println(e);
+            System.out.println("Message " + msgs.get(0).getPayload() + " found in queue.");
+            System.out.println("Sleeping for " + (list.get(0) - System.currentTimeMillis()) + " milliseconds");
+            if (list.get(0) - System.currentTimeMillis() > 0) {
+                Thread.sleep(list.get(0) - System.currentTimeMillis());
             }
             list.remove(0);
             return msgs.remove(0);

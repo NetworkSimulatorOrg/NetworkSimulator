@@ -21,9 +21,7 @@ public class ComputeNode extends Node {
 
         // Create necessary threads
         sendingThread = new Thread(this::startSendMsgThread);
-        sendingThread.start();
         receivingThread = new Thread(this::recvMsgThread);
-        receivingThread.start();
 
         // @TODO Figure out how we want to do sequence numbers
         this.sequenceNumber = 0;
@@ -66,7 +64,7 @@ public class ComputeNode extends Node {
                 // TODO: Delay some way so that doubles aren't repeatedly being generated until it is lower than the probability. This depends on Protocol
                 // Delay is hard coded to 1000 milliseconds.
                 Thread.sleep(delay);
-            } catch (InterruptedException e) {
+            } catch (/*Interrupted*/Exception e) {
                 run = false;
             }
         }
@@ -75,8 +73,8 @@ public class ComputeNode extends Node {
 
     private void recvMsgThread() {
         Message msg = null;
-        var run = true;
-        while(run) {
+        sendingRunning = true;
+        while(sendingRunning) {
             try {
                 // Check if a message is in the queue
                 if ((msg = sleepList.sleep()) != null) {
@@ -94,7 +92,7 @@ public class ComputeNode extends Node {
 
                 //Thread.sleep(delay);
             } catch (/*Interrupted*/Exception e) {
-                run = false;
+                sendingRunning = false;
             }
         }
         System.out.println("Node " + getId() + " terminating recvMsgThread");

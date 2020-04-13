@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Thread.*;
+
 public class Network {
 
     public static int computeNodeCount;
@@ -22,9 +24,17 @@ public class Network {
 
         Protocol protocol = new Aloha();
         network = new Network(protocol);
-        network.buildNodesFromFile("network-description.txt");
+        network.buildNodesFromFile("simple-network.txt");
+        network.run();
 
-        writer.closeFile();
+        try {
+            sleep(1000 * 10);
+        } catch(InterruptedException e) {
+            System.out.println("main: interrupted");
+        } finally {
+            network.stop();
+            writer.closeFile();
+        }
     }
 
     public Network(Protocol protocol){
@@ -102,6 +112,20 @@ public class Network {
                 node.longestDistance = findLongestDistance(node, node);
                 System.out.println(node.id + ": " + node.longestDistance);
             }
+        }
+    }
+
+    public void run() {
+        protocol.run();
+        for(var node : nodes) {
+            node.run();
+        }
+    }
+
+    public void stop() {
+        protocol.terminateThreads();
+        for(var node : nodes) {
+            node.terminateThreads();
         }
     }
 

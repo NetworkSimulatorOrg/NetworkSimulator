@@ -5,7 +5,6 @@ public class ConnectNode extends Node {
 
         // Create necessary threads
         receivingThread = new Thread(this::recvMsgThread);
-        receivingThread.start();
     }
 
     private void sendMsg(Message msg) {
@@ -38,8 +37,8 @@ public class ConnectNode extends Node {
 
     private void recvMsgThread() {
         Message msg = null;
-        var run = true;
-        while(run) {
+        receivingRunning = true;
+        while(receivingRunning) {
             // Check if a message is in the queue
             try {
                 if ((msg = sleepList.sleep()) != null) {
@@ -49,7 +48,7 @@ public class ConnectNode extends Node {
 
                 //Thread.sleep(delay);
             } catch(/*Interrupted*/Exception e) {
-                run = false;
+                receivingRunning = false;
             }
         }
 

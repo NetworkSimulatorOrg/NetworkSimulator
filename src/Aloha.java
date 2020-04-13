@@ -75,6 +75,11 @@ public class Aloha implements Protocol {
     }
 
     @Override
+    public ProtocolState run() {
+        return null;
+    }
+
+    @Override
     public ProtocolState terminateThreads() {
         return null;
     }
