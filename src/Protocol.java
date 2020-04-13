@@ -1,5 +1,3 @@
-import java.util.List;
-
 public interface Protocol {
     /*
      * Takes in the sending node, msg to send

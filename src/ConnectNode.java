@@ -13,7 +13,7 @@ public class ConnectNode extends Node {
         var lastSender = msg.getLastSender();
         msg.setLastSender(id);
         for(Node node : adjacent) {
-            if (node.getId() != lastSender) {
+            if (!node.getId().equals(lastSender)) {
                 super.sendMsg(msg, node.getId());
             }
         }
@@ -30,14 +30,15 @@ public class ConnectNode extends Node {
         var run = true;
         while(run) {
             // Check if a message is in the queue
-            // Send out message. Time delay has passed.
             try {
                 if ((msg = sleepList.sleep()) != null) {
+                    // Send out message. Time delay has passed.
+                    System.out.println("Node " + getId() + " received the message: " + msg.getPayload());
                     sendMsg(msg);
                 }
 
-                Thread.sleep(delay);
-            } catch(InterruptedException e) {
+                //Thread.sleep(delay);
+            } catch(/*Interrupted*/Exception e) {
                 run = false;
             }
         }

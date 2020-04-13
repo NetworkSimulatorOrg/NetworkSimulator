@@ -14,12 +14,22 @@ public class DeltaList {
     }
 
     public synchronized void push(long time, Message msg) {
+
+        System.out.println(msg.getPayload() + " pushed.");
+
+        int i = 0;
+
         // Push the time that 
-        for(int i = 0; i < list.size(); i++) {
+        for(; i < list.size(); i++) {
             if(time < list.get(i)) {
                 list.add(i, time);
                 msgs.add(i, msg);
             }
+        }
+
+        if (list.size() == i){
+            list.add(time);
+            msgs.add(msg);
         }
     }
 
@@ -27,7 +37,11 @@ public class DeltaList {
     public synchronized Message sleep() {
         if(list.size() > 0) {
             try {
-                Thread.sleep(list.get(0) - System.currentTimeMillis());
+                System.out.println("Message " + msgs.get(0).getPayload() + " found in queue.");
+                System.out.println("Sleeping for " + (list.get(0) - System.currentTimeMillis()) + " milliseconds");
+                if (list.get(0) - System.currentTimeMillis() > 0){
+                    Thread.sleep(list.get(0) - System.currentTimeMillis());
+                }
             } catch (InterruptedException e) {
                 System.out.println(e);
             }
