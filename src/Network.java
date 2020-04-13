@@ -94,6 +94,13 @@ public class Network {
         for(var line : lines) {
             addAdjacentNodes(line);
         }
+        for(Node node : nodes) {
+            // Set the longest distance of each compute node
+            if (node instanceof ComputeNode){
+                node.longestDistance = findLongestDistance(node, node);
+                System.out.println(node.id + ": " + node.longestDistance);
+            }
+        }
     }
 
     public void sendReport(Report report){
@@ -107,6 +114,33 @@ public class Network {
         // There was a collision
         // @TODO: Act on the report
         
+    }
+
+    // Finds the longest distance to any node from the current node without going through the previous node.
+    public int findLongestDistance(Node current, Node previous){
+        // This does not allow for cycles
+
+        int max = 0;
+        boolean isLeaf = true;
+
+        for (Node adjacent : current.adjacent){
+            // Don't go to the previous node
+            if (!adjacent.getId().equals(previous.getId())){
+                isLeaf = false;
+                
+                // Find the furthest distance to a node that has not yet been visited.
+                int len = findLongestDistance(adjacent, current);
+                if (max < len){
+                    max = len;
+                }
+            }
+        }
+
+        if (isLeaf){
+            return 0;
+        }
+
+        return distance + max;
     }
 
 }

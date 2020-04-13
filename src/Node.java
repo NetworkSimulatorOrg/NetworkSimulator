@@ -9,6 +9,7 @@ public class Node {
     protected DeltaList sleepList;
     protected double propagationRate;
     protected double distance;
+    protected double longestDistance;
     protected long delay = 1000;
     protected Thread receivingThread = null;
     protected Thread sendingThread = null;
@@ -21,6 +22,7 @@ public class Node {
         this.sleepList = new DeltaList();
         this.propagationRate = propagationRate;
         this.distance = distance;
+        this.longestDistance = distance;
     }
 
     public void terminateThreads() {
@@ -69,8 +71,10 @@ public class Node {
         return id;
     }
 
+    // This is only used for ComputeNode's
     public void sendingDelay() throws InterruptedException {
-         Thread.sleep((long) (propagationRate * distance));
+        // Sleep until the message would have reached every node
+         Thread.sleep((long) (propagationRate * longestDistance));
     }
 
     protected Message propagationDelay() {
