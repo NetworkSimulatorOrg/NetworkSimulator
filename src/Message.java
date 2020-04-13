@@ -14,6 +14,14 @@ public class Message {
         this.corrupt = false;
     }
 
+    public Message clone() {
+        Message copy = new Message(sender, sequenceNumber, payload);
+        copy.lastSender = lastSender;
+        copy.timestamp = timestamp;
+        copy.corrupt = corrupt;
+        return copy;
+    }
+
     public String getSender() {
         return sender;
     }

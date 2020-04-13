@@ -101,7 +101,7 @@ public class Node {
 
             // Set the timestamp at which the message would be received
             msg.setTimestamp(System.currentTimeMillis());
-            recv.sleepList.push((long) (propagationRate * distance) + msg.getTimestamp(), msg);
+            recv.sleepList.push((long) (propagationRate * distance) + msg.getTimestamp(), msg.clone());
         }
     }
 
