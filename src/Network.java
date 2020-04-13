@@ -6,7 +6,8 @@ import java.util.List;
 
 public class Network {
 
-    private int nodeCount, msgLength, distance;
+    public static int computeNodeCount;
+    private int msgLength, distance;
     private double propagationDelay, msgProbability;
     private Protocol protocol;
     private List<Node> nodes;
@@ -59,6 +60,7 @@ public class Network {
         } else if(line[0].toUpperCase().equals("COMPUTE")) {
             node = new ComputeNode(line[1], propagationDelay, distance, msgProbability, msgLength, protocol);
             nodes.add(node);
+            computeNodeCount++;
         } else {
             System.out.println("Unrecognized node type: " + line[0]);
         }
@@ -105,15 +107,6 @@ public class Network {
 
     public void sendReport(Report report){
         report.logReport(writer);
-
-        if (report.getType() == ReportType.Successful){
-            // The packet arrived successfully
-            return;
-        }
-
-        // There was a collision
-        // @TODO: Act on the report
-        
     }
 
     // Finds the longest distance to any node from the current node without going through the previous node.

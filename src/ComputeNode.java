@@ -55,13 +55,14 @@ public class ComputeNode extends Node {
             try {
                 // Check if the node should send the next message.
                 // TODO: this probability is different than the probability of sending for a protocol.
-                if (msgProbability >= rand.nextDouble()) {
+                // I don't think that this is needed because the protocol should take care of this
+                //if (msgProbability >= rand.nextDouble()) {
                     System.out.println("Sending Message: " + sendingMsg.getPayload());
                     // Tell the protocol to send the message and check if it sent correctly
                     if (protocol.sendMsg(this, sendingMsg) == ProtocolState.Success) {
                         nextMsg();
                     }
-                }
+                //}
 
                 // TODO: Delay some way so that doubles aren't repeatedly being generated until it is lower than the probability. This depends on Protocol
                 // Delay is hard coded to 1000 milliseconds.

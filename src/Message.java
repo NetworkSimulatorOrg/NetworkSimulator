@@ -49,4 +49,8 @@ public class Message {
     public void setCorrupt() {
         this.corrupt = true;
     }
+
+    public void uncorrupt(){
+        this.corrupt = false;
+    }
 }

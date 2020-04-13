@@ -74,7 +74,7 @@ public class Node {
     // This is only used for ComputeNode's
     public void sendingDelay() throws InterruptedException {
         // Sleep until the message would have reached every node
-         Thread.sleep((long) (propagationRate * longestDistance));
+         Thread.sleep((long) (propagationRate * longestDistance * 1.1));
     }
 
     protected Message propagationDelay() {
@@ -97,7 +97,7 @@ public class Node {
 
         if(recv != null) {
             // pass message to recv
-            System.out.println("Node " + getId() + " sending to node " + recv.getId());
+            System.out.println("Node " + getId() + " sending " + msg.getPayload() + " to node " + recv.getId());
 
             // Set the timestamp at which the message would be received
             msg.setTimestamp(System.currentTimeMillis());

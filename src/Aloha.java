@@ -1,19 +1,45 @@
+
+/* For Aloha, if a message collides with another,
+ * the message should be resent at some later point in time.
+ * This will be simulated by generating a random number 0 to (2 * Number of nodes).
+ * The next message will be sent at this random number * propagation rate * longest distance
+ * after the sending delay ends.
+ */
+
 public class Aloha implements Protocol {
     @Override
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
-        // Handle node state
-        node.setSending(true);
+        
+        // Keep resending the message until there is no collision
+        while (true){
+            // Handle node state
+            node.setSending(true);
 
-        // Send to all nodes
-        for(Node adjacent : node.adjacent) {
-            node.sendMsg(msg, adjacent.getId());
+            // Send to all nodes
+            for(Node adjacent : node.adjacent) {
+                node.sendMsg(msg, adjacent.getId());
+            }
+
+            // Sleep the sending thread so that it doesn't try to send another until the first one would be received by every node.
+            node.sendingDelay();
+
+            // Handle node state
+            node.setSending(false);
+
+            // Check if this message collided
+            if (msg.isCorrupt()){
+                // Resend the message at some future time.
+                int delay = (int) (Math.random() * Network.computeNodeCount * node.longestDistance * node.propagationRate);
+                System.out.println("Node " + node.getId() + " will be delayed for " + delay + " ms.");
+                Thread.sleep(delay);
+                msg.uncorrupt();
+                msg.setLastSender(node.getId());
+            }
+            else{
+                break;
+            }
+
         }
-
-        // Sleep the sending thread so that it doesn't try to send another until the first one would be received by every node.
-        node.sendingDelay();
-
-        // Handle node state
-        node.setSending(false);
 
         // No check for state of line, so always return success.
         return ProtocolState.Success;
