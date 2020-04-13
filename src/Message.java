@@ -6,11 +6,10 @@ public class Message {
     private final String payload;
     private boolean corrupt;
 
-    public Message(String sender, int sequenceNumber, long timestamp, String payload) {
+    public Message(String sender, int sequenceNumber, String payload) {
         this.sender = sender;
         this.lastSender = sender;
         this.sequenceNumber = sequenceNumber;
-        this.timestamp = timestamp;
         this.payload = payload;
         this.corrupt = false;
     }

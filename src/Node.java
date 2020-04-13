@@ -97,6 +97,10 @@ public class Node {
 
         if(recv != null) {
             // pass message to recv
+            System.out.println("Node " + getId() + " sending to node " + recv.getId());
+
+            // Set the timestamp at which the message would be received
+            msg.setTimestamp(System.currentTimeMillis());
             recv.sleepList.push((long) (propagationRate * distance) + msg.getTimestamp(), msg);
         }
     }

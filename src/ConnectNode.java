@@ -33,11 +33,12 @@ public class ConnectNode extends Node {
             // Send out message. Time delay has passed.
             try {
                 if ((msg = sleepList.sleep()) != null) {
+                    System.out.println("Node " + getId() + " received the message: " + msg.getPayload());
                     sendMsg(msg);
                 }
 
-                Thread.sleep(delay);
-            } catch(InterruptedException e) {
+                //Thread.sleep(delay);
+            } catch(/*Interrupted*/Exception e) {
                 run = false;
             }
         }
