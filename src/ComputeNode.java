@@ -4,7 +4,7 @@ public class ComputeNode extends Node {
     private double msgProbability;
     private int msgLength;
     private Protocol protocol;
-    private Message msg;
+    private Message sendingMsg;
     private Random rand;
 
     private int sequenceNumber;
@@ -20,23 +20,33 @@ public class ComputeNode extends Node {
         nextMsg();
 
         // Create necessary threads
-        sendingThread = new Thread(this::sendMsgThread);
+        sendingThread = new Thread(this::startSendMsgThread);
         sendingThread.start();
         receivingThread = new Thread(this::recvMsgThread);
         receivingThread.start();
 
         // @TODO Figure out how we want to do sequence numbers
-        sequenceNumber = 0;
+        this.sequenceNumber = 0;
     }
 
     private void nextMsg() {
         // The message will just contain the node's unique character repeatedly
         StringBuilder payload = new StringBuilder();
         for(int i = 0; i < msgLength; i++) {
-            payload.append(i + 'a');
+            //payload.append((char)(i + 'a'));
+            payload.append(getId());
         }
 
-        this.msg = new Message(id, this.sequenceNumber++, System.currentTimeMillis(), payload.toString());
+        this.sendingMsg = new Message(id, this.sequenceNumber++, payload.toString());
+    }
+
+    private void startSendMsgThread(){
+        try{
+            Thread.sleep(200);
+            sendMsgThread();
+        } catch (Exception e) {
+
+        }
     }
 
     private void sendMsgThread() {
@@ -45,14 +55,16 @@ public class ComputeNode extends Node {
             try {
                 // Check if the node should send the next message.
                 // TODO: this probability is different than the probability of sending for a protocol.
-                if (msgProbability >= rand.nextDouble()) {
+                // I don't think that this is needed because the protocol should take care of this
+                //if (msgProbability >= rand.nextDouble()) {
+                    System.out.println("Sending Message: " + sendingMsg.getPayload());
                     // Tell the protocol to send the message and check if it sent correctly
-                    if (protocol.sendMsg(this, msg) == ProtocolState.Success) {
+                    if (protocol.sendMsg(this, sendingMsg) == ProtocolState.Success) {
                         nextMsg();
                     }
-                }
+                //}
 
-                // @TODO: Delay some way so that doubles aren't repeatedly being generated until it is lower than the probability.
+                // TODO: Delay some way so that doubles aren't repeatedly being generated until it is lower than the probability. This depends on Protocol
                 // Delay is hard coded to 1000 milliseconds.
                 Thread.sleep(delay);
             } catch (InterruptedException e) {
@@ -71,14 +83,24 @@ public class ComputeNode extends Node {
                     if (protocol.recvMsg(this, msg) == ProtocolState.Success) {
                         sendReport(ReportType.Successful, msg, msg.getSender(), getId());
                     } else {
+                        // Set the incoming message as a collision in the report
                         sendReport(ReportType.Collision, msg, msg.getSender(), getId());
+
+                        // Set the outgoing message as a collision in the report
+                        sendReport(ReportType.Collision, sendingMsg, getId(), msg.getSender());
                     }
                 }
 
-                Thread.sleep(delay);
-            } catch (InterruptedException e) {
+                //Thread.sleep(delay);
+            } catch (/*Interrupted*/Exception e) {
                 run = false;
             }
+        }
+    }
+
+    public void setSendingCorrupt(){
+        if (sendingMsg != null){
+            sendingMsg.setCorrupt();
         }
     }
 
