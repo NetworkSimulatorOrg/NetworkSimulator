@@ -4,7 +4,7 @@ public class ComputeNode extends Node {
     private double msgProbability;
     private int msgLength;
     private Protocol protocol;
-    private Message msg;
+    private Message sendingMsg;
     private Random rand;
 
     private int sequenceNumber;
@@ -26,7 +26,7 @@ public class ComputeNode extends Node {
         receivingThread.start();
 
         // @TODO Figure out how we want to do sequence numbers
-        sequenceNumber = 0;
+        this.sequenceNumber = 0;
     }
 
     private void nextMsg() {
@@ -36,7 +36,7 @@ public class ComputeNode extends Node {
             payload.append(i + 'a');
         }
 
-        this.msg = new Message(id, this.sequenceNumber++, System.currentTimeMillis(), payload.toString());
+        this.sendingMsg = new Message(id, this.sequenceNumber++, System.currentTimeMillis(), payload.toString());
     }
 
     private void sendMsgThread() {
@@ -47,7 +47,7 @@ public class ComputeNode extends Node {
                 // TODO: this probability is different than the probability of sending for a protocol.
                 if (msgProbability >= rand.nextDouble()) {
                     // Tell the protocol to send the message and check if it sent correctly
-                    if (protocol.sendMsg(this, msg) == ProtocolState.Success) {
+                    if (protocol.sendMsg(this, sendingMsg) == ProtocolState.Success) {
                         nextMsg();
                     }
                 }
@@ -71,7 +71,11 @@ public class ComputeNode extends Node {
                     if (protocol.recvMsg(this, msg) == ProtocolState.Success) {
                         sendReport(ReportType.Successful, msg, msg.getSender(), getId());
                     } else {
+                        // Set the incoming message as a collision in the report
                         sendReport(ReportType.Collision, msg, msg.getSender(), getId());
+
+                        // Set the outgoing message as a collision in the report
+                        sendReport(ReportType.Collision, sendingMsg, getId(), msg.getSender());
                     }
                 }
 
@@ -79,6 +83,12 @@ public class ComputeNode extends Node {
             } catch (InterruptedException e) {
                 run = false;
             }
+        }
+    }
+
+    public void setSendingCorrupt(){
+        if (sendingMsg != null){
+            sendingMsg.setCorrupt();
         }
     }
 

@@ -42,6 +42,12 @@ public class Report {
     }
 
     private void logCollision(CSVWriter writer){
+        /* 
+         * TODO: Check if the message + sequence number combination has already been logged.
+         * If it has been logged as a success, then overwrite it to a failure.
+         */
+
+
         System.out.println("Collision: " + msg.getPayload() + " collided when going from Node " + msg.getLastSender() + " to Node " + receiver);
         writer.appendDataAsLine("Collision", sender, receiver, Integer.toString(msg.getSequenceNumber()), msg.getPayload());
     }
