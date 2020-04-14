@@ -32,11 +32,11 @@ public class Report {
 
     private void logSuccessful(CSVWriter writer){
         System.out.println("Success: Node " + sender + "'s message was received by everyone.-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!");
-        writer.appendDataAsLine("Success", sender, Integer.toString(msg.getSequenceNumber()), "\"" + msg.getPayload() + "\"");
+        writer.appendDataAsLine("Success", sender, Integer.toString(msg.getSequenceNumber()), Integer.toString(msg.getRepeatCount()), "\"" + msg.getPayload() + "\"");
     }
 
     private void logCollision(CSVWriter writer){
         System.out.println("Collision: " + msg.getPayload() + " collided with another message.");
-        writer.appendDataAsLine("Collision", sender, Integer.toString(msg.getSequenceNumber()), "\"" + msg.getPayload() + "\"");
+        writer.appendDataAsLine("Collision", sender, Integer.toString(msg.getSequenceNumber()), Integer.toString(msg.getRepeatCount()), "\"" + msg.getPayload() + "\"");
     }
 }

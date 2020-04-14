@@ -47,8 +47,7 @@ public class Aloha implements Protocol {
                 int delay = (int) (Math.random() * Network.computeNodeCount * node.longestDistance * node.propagationRate);
                 System.out.println("Node " + node.getId() + " will be delayed for " + delay + " ms.");
                 Thread.sleep(delay);
-                msg.uncorrupt();
-                msg.resetNodesRemaining();
+                msg.prepareForRetransmission();
             }
             else{
                 // Send a report that the message was successfully received by all nodes.
