@@ -91,7 +91,6 @@ public class Message {
 
             // If all ComputeNodes have been reached, stop the sender's waiting
             if (nodesRemaining == 0){
-                System.out.println(payload + " reached all receivers-------------");
                 this.notifyAll();
             }
         }

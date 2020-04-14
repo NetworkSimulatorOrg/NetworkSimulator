@@ -75,16 +75,7 @@ public class ComputeNode extends Node {
             try {
                 // Check if a message is in the queue
                 if ((msg = sleepList.sleep()) != null) {
-                    //System.out.println("Compute " + getId() + ": Receiving message\n" + sendingMsg.toString("\t"));
-                    if (protocol.recvMsg(this, msg) == ProtocolState.Success) {
-                        sendReport(ReportType.Successful, msg, msg.getSender(), getId());
-                    } else {
-                        // Set the incoming message as a collision in the report
-                        sendReport(ReportType.Collision, msg, msg.getSender(), getId());
-
-                        // Set the outgoing message as a collision in the report
-                        sendReport(ReportType.Collision, sendingMsg, getId(), msg.getSender());
-                    }
+                    protocol.recvMsg(this, msg);
                 }
 
             } catch (Exception e) {

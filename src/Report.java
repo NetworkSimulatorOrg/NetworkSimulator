@@ -1,13 +1,11 @@
 public class Report {
     private ReportType type;
     private String sender;
-    private String receiver;
     private Message msg;
 
-    public Report(ReportType type, String sender, String receiver, Message msg) {
+    public Report(ReportType type, String sender,  Message msg) {
         this.type = type;
         this.sender = sender;
-        this.receiver = receiver;
         this.msg = msg;
     }
 
@@ -17,10 +15,6 @@ public class Report {
 
     public String getSender(){
         return sender;
-    }
-
-    public String getReceiver(){
-        return receiver;
     }
 
     public Message getMsg(){
@@ -37,17 +31,12 @@ public class Report {
     }
 
     private void logSuccessful(CSVWriter writer){
-        System.out.println("Node " + receiver + " received the message " + msg.getPayload() + ".");
-        writer.appendDataAsLine("Success", sender, receiver, Integer.toString(msg.getSequenceNumber()), "\"" + msg.getPayload() + "\"");
+        System.out.println("Success: Node " + sender + "'s message was received by everyone.-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!");
+        writer.appendDataAsLine("Success", sender, Integer.toString(msg.getSequenceNumber()), "\"" + msg.getPayload() + "\"");
     }
 
     private void logCollision(CSVWriter writer){
-        /* 
-         * TODO: Check if the message + sequence number combination has already been logged.
-         * If it has been logged as a success, then overwrite it to a failure.
-         */
-
-        System.out.println("Collision: " + msg.getPayload() + " collided when going to Node " + receiver);
-        writer.appendDataAsLine("Collision", sender, receiver, Integer.toString(msg.getSequenceNumber()), "\"" + msg.getPayload() + "\"");
+        System.out.println("Collision: " + msg.getPayload() + " collided with another message.");
+        writer.appendDataAsLine("Collision", sender, Integer.toString(msg.getSequenceNumber()), "\"" + msg.getPayload() + "\"");
     }
 }

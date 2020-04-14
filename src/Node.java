@@ -120,12 +120,6 @@ public class Node {
         }
     }
 
-    public void sendReport(ReportType type, Message msg, String sender, String receiver) {
-        Report report = new Report(type, sender, receiver, msg);
-        // Send report to network.
-        Network.network.sendReport(report);
-    }
-
 
 
     public void addAdjacentNode(Node node){
