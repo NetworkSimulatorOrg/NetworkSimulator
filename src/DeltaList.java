@@ -15,7 +15,7 @@ public class DeltaList {
 
     public synchronized void push(long time, Message msg) {
 
-        System.out.println(msg.getPayload() + " pushed.");
+        //System.out.println(msg.getPayload() + " pushed at " + System.currentTimeMillis() + ". Wakes up at " + time);
 
         int i = 0;
 
@@ -24,6 +24,7 @@ public class DeltaList {
             if(time < list.get(i)) {
                 list.add(i, time);
                 msgs.add(i, msg);
+                break;
             }
         }
 
@@ -36,9 +37,9 @@ public class DeltaList {
     // Waits until first item has expired.
     public synchronized Message sleep() throws InterruptedException {
         if(list.size() > 0) {
-            System.out.println("Message " + msgs.get(0).getPayload() + " found in queue.");
-            System.out.println("Sleeping for " + (list.get(0) - System.currentTimeMillis()) + " milliseconds");
-            if (list.get(0) - System.currentTimeMillis() > 0) {
+            //System.out.println("Message " + msgs.get(0).getPayload() + " found in queue.");
+            System.out.println(msgs.get(0).getPayload() + " Sleeping for " + (list.get(0) - System.currentTimeMillis()) + " milliseconds");
+            if (list.get(0) - System.currentTimeMillis() > 5) {
                 Thread.sleep(list.get(0) - System.currentTimeMillis());
             }
             list.remove(0);

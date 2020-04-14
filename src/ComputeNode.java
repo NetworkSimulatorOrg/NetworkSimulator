@@ -6,6 +6,7 @@ public class ComputeNode extends Node {
     private Protocol protocol;
     private Message sendingMsg;
     private Random rand;
+    protected String[] lastSenderStructure;
 
     private int sequenceNumber;
 
@@ -15,9 +16,6 @@ public class ComputeNode extends Node {
         this.msgLength = msgLength;
         this.protocol = protocol;
         this.rand = new Random();
-
-        // Prepare the first message sent from the node
-        nextMsg();
 
         // Create necessary threads
         sendingThread = new Thread(this::startSendMsgThread);
@@ -35,12 +33,14 @@ public class ComputeNode extends Node {
             payload.append(getId());
         }
 
-        this.sendingMsg = new Message(id, this.sequenceNumber++, payload.toString());
+        this.sendingMsg = new Message(id, this.sequenceNumber++, payload.toString(), lastSenderStructure);
     }
 
     private void startSendMsgThread(){
         try{
             Thread.sleep(200);
+            // Prepare the first message sent from the node
+            nextMsg();
             sendMsgThread();
         } catch (Exception e) {
 
@@ -51,20 +51,17 @@ public class ComputeNode extends Node {
         var run = true;
         while(run) {
             try {
-                // Check if the node should send the next message.
-                // TODO: this probability is different than the probability of sending for a protocol.
-                // I don't think that this is needed because the protocol should take care of this
-                //if (msgProbability >= rand.nextDouble()) {
-                    // Tell the protocol to send the message and check if it sent correctly
-                    if (protocol.sendMsg(this, sendingMsg) == ProtocolState.Success) {
-                        nextMsg();
-                    }
-                //}
+                
+                // Tell the protocol to send the message and check if it sent correctly
+                if (protocol.sendMsg(this, sendingMsg) == ProtocolState.Success) {
+                    nextMsg();
+                }
 
-                // TODO: Delay some way so that doubles aren't repeatedly being generated until it is lower than the probability. This depends on Protocol
-                // Delay is hard coded to 1000 milliseconds.
+                // Delay to represent the new message being sent at a random time
+                // TODO: Randomize delay
                 Thread.sleep(delay);
             } catch (/*Interrupted*/Exception e) {
+                System.out.println(e.toString());
                 run = false;
             }
         }
@@ -78,20 +75,12 @@ public class ComputeNode extends Node {
             try {
                 // Check if a message is in the queue
                 if ((msg = sleepList.sleep()) != null) {
-                    System.out.println("Compute " + getId() + ": Receiving message\n" + sendingMsg.toString("\t"));
-                    if (protocol.recvMsg(this, msg) == ProtocolState.Success) {
-                        sendReport(ReportType.Successful, msg, msg.getSender(), getId());
-                    } else {
-                        // Set the incoming message as a collision in the report
-                        sendReport(ReportType.Collision, msg, msg.getSender(), getId());
-
-                        // Set the outgoing message as a collision in the report
-                        sendReport(ReportType.Collision, sendingMsg, getId(), msg.getSender());
-                    }
+                    protocol.recvMsg(this, msg);
                 }
 
-                //Thread.sleep(delay);
-            } catch (/*Interrupted*/Exception e) {
+            } catch (Exception e) {
+                System.out.println(e.toString());
+                e.printStackTrace(System.out);
                 sendingRunning = false;
             }
         }
@@ -102,6 +91,10 @@ public class ComputeNode extends Node {
         if (sendingMsg != null){
             sendingMsg.setCorrupt();
         }
+    }
+
+    protected void setLastSenderStructureSize(int size){
+        lastSenderStructure = new String[size];
     }
 
 }

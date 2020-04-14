@@ -85,9 +85,11 @@ public class Node {
     }
 
     // This is only used for ComputeNode's
-    public void sendingDelay() throws InterruptedException {
-        // Sleep until the message would have reached every node
-         Thread.sleep((long) (propagationRate * longestDistance * 1.1));
+    public void sendingDelay(Message msg) throws InterruptedException {
+        // Wait until the message has reached every node
+        synchronized(msg){
+            msg.wait();
+        }
     }
 
     protected Message propagationDelay() throws InterruptedException {
@@ -112,16 +114,10 @@ public class Node {
             // pass message to recv
             //System.out.println("Node " + getId() + " sending " + msg.getPayload() + " to node " + recv.getId());
 
-            // Set the timestamp at which the message would be received
-            msg.setTimestamp(System.currentTimeMillis());
-            recv.sleepList.push((long) (propagationRate * distance) + msg.getTimestamp(), msg.clone());
+            // Set the timestamp at which the message would be received for the node that receives it
+            //msg.setTimestamp((long) (propagationRate * distance) + System.currentTimeMillis(), receiver);
+            recv.sleepList.push((long) (propagationRate * distance) + System.currentTimeMillis(), msg);
         }
-    }
-
-    public void sendReport(ReportType type, Message msg, String sender, String receiver) {
-        Report report = new Report(type, sender, receiver, msg);
-        // Send report to network.
-        Network.network.sendReport(report);
     }
 
 

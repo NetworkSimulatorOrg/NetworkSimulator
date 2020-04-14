@@ -9,8 +9,7 @@ public class ConnectNode extends Node {
 
     private void sendMsg(Message msg) {
         // Send the message to all adjacent nodes besides the one that sent it,
-        var lastSender = msg.getLastSender();
-        msg.setLastSender(id);
+        var lastSender = msg.getLastSender(id);
 
         StringBuilder builder = new StringBuilder();
         builder.append("Connect ");
