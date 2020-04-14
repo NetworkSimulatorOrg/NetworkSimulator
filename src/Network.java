@@ -8,7 +8,7 @@ import static java.lang.Thread.*;
 
 public class Network {
 
-    public static int computeNodeCount;
+    public static int computeNodeCount = 0, nodeCount = 0;
     private int msgLength, distance;
     private double propagationDelay, msgProbability;
     private Protocol protocol;
@@ -24,7 +24,7 @@ public class Network {
 
         Protocol protocol = new Aloha();
         network = new Network(protocol);
-        network.buildNodesFromFile("simple-network.txt");
+        network.buildNodesFromFile("middling-network.txt");
         network.run();
 
         try {
@@ -32,6 +32,7 @@ public class Network {
         } catch(InterruptedException e) {
             System.out.println("main: interrupted");
         } finally {
+            System.out.println("ENDING");
             network.stop();
             writer.closeFile();
         }
@@ -67,10 +68,12 @@ public class Network {
         if(line[0].toUpperCase().equals("CONNECT")) {
             node = new ConnectNode(line[1], propagationDelay, distance);
             nodes.add(node);
+            nodeCount++;
         } else if(line[0].toUpperCase().equals("COMPUTE")) {
             node = new ComputeNode(line[1], propagationDelay, distance, msgProbability, msgLength, protocol);
             nodes.add(node);
             computeNodeCount++;
+            nodeCount++;
         } else {
             System.out.println("Unrecognized node type: " + line[0]);
         }
@@ -109,7 +112,9 @@ public class Network {
         for(Node node : nodes) {
             // Set the longest distance of each compute node
             if (node instanceof ComputeNode){
-                node.longestDistance = findLongestDistance(node, node);
+                ((ComputeNode)node).setLastSenderStructureSize(nodeCount);
+                node.longestDistance = findLongestDistance((ComputeNode)node, node, node);
+
                 System.out.println(node.id + ": " + node.longestDistance);
             }
         }
@@ -134,8 +139,11 @@ public class Network {
     }
 
     // Finds the longest distance to any node from the current node without going through the previous node.
-    public int findLongestDistance(Node current, Node previous){
+    public int findLongestDistance(ComputeNode original, Node current, Node previous){
         // This does not allow for cycles
+
+        // Set the original node's lastSenderStructure so that the current node's previous value is the previous node (Used in messages)
+        original.lastSenderStructure[Integer.parseInt(current.getId())] = previous.getId();
 
         int max = 0;
         boolean isLeaf = true;
@@ -146,7 +154,7 @@ public class Network {
                 isLeaf = false;
                 
                 // Find the furthest distance to a node that has not yet been visited.
-                int len = findLongestDistance(adjacent, current);
+                int len = findLongestDistance(original, adjacent, current);
                 if (max < len){
                     max = len;
                 }
