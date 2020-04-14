@@ -79,8 +79,8 @@ public class ComputeNode extends Node {
                 }
 
             } catch (Exception e) {
-                System.out.println(e.toString());
-                e.printStackTrace(System.out);
+                //System.out.println(e.toString());
+                //e.printStackTrace(System.out);
                 sendingRunning = false;
             }
         }

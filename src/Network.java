@@ -24,11 +24,11 @@ public class Network {
 
         Protocol protocol = new Aloha();
         network = new Network(protocol);
-        network.buildNodesFromFile("middling-network.txt");
+        network.buildNodesFromFile("complex-network.txt");
         network.run();
 
         try {
-            sleep(1000 * 10);
+            sleep(1000 * 30);
         } catch(InterruptedException e) {
             System.out.println("main: interrupted");
         } finally {
