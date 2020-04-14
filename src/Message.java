@@ -20,20 +20,25 @@ public class Message {
 
     @Override
     public String toString() {
-        return toString("");
+        return toString("", null);
     }
 
-    public String toString(String tab) {
+    public String toString(String tab, String receivedAt) {
         StringBuilder builder = new StringBuilder();
         builder.append(
                 tab + "+-------------------------------+\n" +
                 tab + "| Originator: " + sender + "\t\t\t\t\t|\n" +
                 tab + "| Sequence number: " + sequenceNumber + "\t\t\t|\n" +
                 tab + "| Payload: " + payload + "\t|\n" +
-                tab + "+ - - Current Hop - - - - - - - +\n" +
-                // TODO: Log last sender
-                //tab + "| Last Sender: " + lastSender + "\t\t\t\t|\n" +
-                tab + "| Corrupt: " + corrupt + "\t\t\t\t|\n" +
+                tab + "+ - - Current Hop - - - - - - - +\n");
+        if(receivedAt != null) {
+            builder.append(
+                    tab + "| Received At: " + receivedAt + "\t\t\t\t|\n" +
+                    tab + "| Last Sender: " + lastSenders[Integer.parseInt(receivedAt)] + "\t\t\t\t|\n"
+            );
+        }
+        builder.append(
+                tab + "| Corrupt: " + (corrupt ? ("true\t\t\t\t\t|\n") : ("false\t\t\t\t|\n")) +
                 tab + "+-------------------------------+\n"
         );
         return builder.toString();

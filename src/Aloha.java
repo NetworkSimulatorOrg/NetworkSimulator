@@ -19,7 +19,7 @@ public class Aloha implements Protocol {
             builder.append("Compute ");
             builder.append(node.getId());
             builder.append(": Generating message\n");
-            builder.append(msg.toString("\t"));
+            builder.append(msg.toString("\t", node.getId()));
 
             // Send to all nodes
             for(Node adjacent : node.adjacent) {
