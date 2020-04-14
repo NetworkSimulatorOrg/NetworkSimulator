@@ -1,8 +1,8 @@
 
 /* For Aloha, if a message collides with another,
  * the message should be resent at some later point in time.
- * This will be simulated by generating a random number 0 to (2 * Number of nodes).
- * The next message will be sent at this random number * propagation rate * longest distance
+ * This will be simulated by generating a random number 0 to the number of ComputeNodes.
+ * The next message will be sent at this random number * propagation rate * the node's longest distance
  * after the sending delay ends.
  */
 
@@ -32,8 +32,8 @@ public class Aloha implements Protocol {
             System.out.println(builder.toString());
 
 
-            // Sleep the sending thread so that it doesn't try to send another until the first one would be received by every node.
-            node.sendingDelay();
+            // Wait the sending thread so that it doesn't try to send another until the first one has been received by every node.
+            node.sendingDelay(msg);
 
             // Handle node state
             node.setSending(false);
@@ -45,7 +45,7 @@ public class Aloha implements Protocol {
                 System.out.println("Node " + node.getId() + " will be delayed for " + delay + " ms.");
                 Thread.sleep(delay);
                 msg.uncorrupt();
-                msg.setLastSender(node.getId());
+                msg.resetNodesRemaining();
             }
             else{
                 break;
@@ -67,6 +67,8 @@ public class Aloha implements Protocol {
 
             // Aloha does not stop sending the outgoing message. Do not end the sending delay.
         }
+
+        msg.received();
 
         // Check for corruption and collision
         if(msg.isCorrupt())

@@ -47,7 +47,7 @@ public class Report {
          * If it has been logged as a success, then overwrite it to a failure.
          */
 
-        System.out.println("Collision: " + msg.getPayload() + " collided when going from Node " + msg.getLastSender() + " to Node " + receiver);
+        System.out.println("Collision: " + msg.getPayload() + " collided when going to Node " + receiver);
         writer.appendDataAsLine("Collision", sender, receiver, Integer.toString(msg.getSequenceNumber()), "\"" + msg.getPayload() + "\"");
     }
 }

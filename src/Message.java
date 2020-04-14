@@ -1,25 +1,21 @@
 public class Message {
     private final String sender;
-    private String lastSender;
+    private String[] lastSenders;
     private final int sequenceNumber;
-    private long timestamp;
+    //private long[] timestamps;
     private final String payload;
     private boolean corrupt;
+    private int nodesRemaining;
 
-    public Message(String sender, int sequenceNumber, String payload) {
+
+    public Message(String sender, int sequenceNumber, String payload, String[] lastSenders) {
         this.sender = sender;
-        this.lastSender = sender;
         this.sequenceNumber = sequenceNumber;
         this.payload = payload;
         this.corrupt = false;
-    }
-
-    public Message clone() {
-        Message copy = new Message(sender, sequenceNumber, payload);
-        copy.lastSender = lastSender;
-        copy.timestamp = timestamp;
-        copy.corrupt = corrupt;
-        return copy;
+        this.lastSenders = lastSenders;
+        //timestamps = new long[Network.nodeCount];
+        nodesRemaining = Network.computeNodeCount - 1;
     }
 
     @Override
@@ -35,7 +31,8 @@ public class Message {
                 tab + "| Sequence number: " + sequenceNumber + "\t\t\t|\n" +
                 tab + "| Payload: " + payload + "\t|\n" +
                 tab + "+ - - Current Hop - - - - - - - +\n" +
-                tab + "| Last Sender: " + lastSender + "\t\t\t\t|\n" +
+                // TODO: Log last sender
+                //tab + "| Last Sender: " + lastSender + "\t\t\t\t|\n" +
                 tab + "| Corrupt: " + corrupt + "\t\t\t\t|\n" +
                 tab + "+-------------------------------+\n"
         );
@@ -46,25 +43,23 @@ public class Message {
         return sender;
     }
 
-    public String getLastSender() {
-        return lastSender;
-    }
-
-    public void setLastSender(String sender) {
-        this.lastSender = sender;
+    public String getLastSender(String nodeId) {
+        return lastSenders[Integer.parseInt(nodeId)];
     }
 
     public int getSequenceNumber() {
         return sequenceNumber;
     }
 
-    public long getTimestamp() {
-        return timestamp;
+    /*
+    public long getTimestamp(String nodeId) {
+        return timestamps[Integer.parseInt(nodeId)];
     }
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
+    public void setTimestamp(long timestamp, String nodeId) {
+        timestamps[Integer.parseInt(nodeId)] = timestamp;
     }
+    */
 
     public String getPayload() {
         return payload;
@@ -80,5 +75,25 @@ public class Message {
 
     public void uncorrupt(){
         this.corrupt = false;
+    }
+
+    public void resetNodesRemaining(){
+        // Reset the number of compute nodes that have to acknowledge this message
+        synchronized(this){
+            nodesRemaining = Network.computeNodeCount - 1;
+        }
+    }
+
+    public void received(){
+        // A compute node has acknowledged this message (Success or Collision)
+        synchronized(this){
+            nodesRemaining--;
+
+            // If all ComputeNodes have been reached, stop the sender's waiting
+            if (nodesRemaining == 0){
+                System.out.println(payload + " reached all receivers-------------");
+                this.notifyAll();
+            }
+        }
     }
 }
