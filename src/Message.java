@@ -2,6 +2,7 @@ public class Message {
     private final String sender;
     private String[] lastSenders;
     private final int sequenceNumber;
+    private int repeatCount;
     //private long[] timestamps;
     private final String payload;
     private boolean corrupt;
@@ -13,6 +14,7 @@ public class Message {
         this.sequenceNumber = sequenceNumber;
         this.payload = payload;
         this.corrupt = false;
+        this.repeatCount = 0;
         this.lastSenders = lastSenders;
         //timestamps = new long[Network.nodeCount];
         nodesRemaining = Network.computeNodeCount - 1;
@@ -20,20 +22,26 @@ public class Message {
 
     @Override
     public String toString() {
-        return toString("");
+        return toString("", null);
     }
 
-    public String toString(String tab) {
+    public String toString(String tab, String receivedAt) {
         StringBuilder builder = new StringBuilder();
         builder.append(
                 tab + "+-------------------------------+\n" +
                 tab + "| Originator: " + sender + "\t\t\t\t\t|\n" +
                 tab + "| Sequence number: " + sequenceNumber + "\t\t\t|\n" +
+                tab + "| Repeat Transmission Count: " + repeatCount + "\t|\n" +
                 tab + "| Payload: " + payload + "\t|\n" +
-                tab + "+ - - Current Hop - - - - - - - +\n" +
-                // TODO: Log last sender
-                //tab + "| Last Sender: " + lastSender + "\t\t\t\t|\n" +
-                tab + "| Corrupt: " + corrupt + "\t\t\t\t|\n" +
+                tab + "+ - - Current Hop - - - - - - - +\n");
+        if(receivedAt != null) {
+            builder.append(
+                    tab + "| Received At: " + receivedAt + "\t\t\t\t|\n" +
+                    tab + "| Last Sender: " + lastSenders[Integer.parseInt(receivedAt)] + "\t\t\t\t|\n"
+            );
+        }
+        builder.append(
+                tab + "| Corrupt: " + (corrupt ? ("true\t\t\t\t\t|\n") : ("false\t\t\t\t|\n")) +
                 tab + "+-------------------------------+\n"
         );
         return builder.toString();
@@ -49,6 +57,10 @@ public class Message {
 
     public int getSequenceNumber() {
         return sequenceNumber;
+    }
+
+    public int getRepeatCount() {
+        return repeatCount;
     }
 
     /*
@@ -73,26 +85,20 @@ public class Message {
         this.corrupt = true;
     }
 
-    public void uncorrupt(){
+    public synchronized void prepareForRetransmission() {
+        repeatCount++;
         this.corrupt = false;
-    }
-
-    public void resetNodesRemaining(){
         // Reset the number of compute nodes that have to acknowledge this message
-        synchronized(this){
-            nodesRemaining = Network.computeNodeCount - 1;
-        }
+        nodesRemaining = Network.computeNodeCount - 1;
     }
 
-    public void received(){
+    public synchronized void received() {
         // A compute node has acknowledged this message (Success or Collision)
-        synchronized(this){
-            nodesRemaining--;
+        nodesRemaining--;
 
-            // If all ComputeNodes have been reached, stop the sender's waiting
-            if (nodesRemaining == 0){
-                this.notifyAll();
-            }
+        // If all ComputeNodes have been reached, stop the sender's waiting
+        if (nodesRemaining == 0) {
+            this.notifyAll();
         }
     }
 }

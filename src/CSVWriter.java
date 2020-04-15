@@ -47,7 +47,7 @@ public class CSVWriter {
         return true;
     }
 
-    public void bufferWrite(boolean force) {
+    public synchronized void bufferWrite(boolean force) {
         // TODO: what buffer size?
         if((force && data.size() > 0) || data.size() > 20) {
             if(openFile()) {
@@ -60,7 +60,7 @@ public class CSVWriter {
         }
     }
 
-    public void appendLine(String[] line) {
+    public synchronized void appendLine(String[] line) {
         data.add(line);
         bufferWrite(false);
     }
@@ -69,7 +69,7 @@ public class CSVWriter {
         appendLine(strings);
     }
 
-    public void appendLines(ArrayList<String[]> lines) {
+    public synchronized void appendLines(ArrayList<String[]> lines) {
         for (String[] line : lines) {
             data.add(line);
         }
