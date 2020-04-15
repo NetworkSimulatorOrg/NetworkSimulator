@@ -8,8 +8,9 @@ import static java.lang.Thread.*;
 
 public class Network {
 
+    private int msgLength, distance;
+    private double propagationDelay, msgProbability;
     public static int computeNodeCount = 0, nodeCount = 0, longestPath = 0;
-    private int msgLength, distance, propagationRate;
     private Protocol protocol;
     private List<Node> nodes;
     public static CSVWriter writer;
@@ -21,7 +22,6 @@ public class Network {
         writer = new CSVWriter("csvOutput.csv");
         writer.openFile();
 
-        //Protocol protocol = new Aloha();
         Protocol protocol = new Aloha();
         network = new Network(protocol);
         network.buildNodesFromFile("complex-network.txt");
@@ -41,7 +41,8 @@ public class Network {
     public Network(Protocol protocol){
         msgLength = 20;
         distance = 5;
-        propagationRate = 20;
+        propagationDelay = 20;
+        msgProbability = 1;
         nodes = new ArrayList<>();
         this.protocol = protocol;
     }
@@ -65,11 +66,11 @@ public class Network {
     private void buildNode(String[] line) {
         Node node;
         if(line[0].toUpperCase().equals("CONNECT")) {
-            node = new ConnectNode(line[1], propagationRate, distance);
+            node = new ConnectNode(line[1], propagationDelay, distance);
             nodes.add(node);
             nodeCount++;
         } else if(line[0].toUpperCase().equals("COMPUTE")) {
-            node = new ComputeNode(line[1], propagationRate, distance, msgLength, protocol);
+            node = new ComputeNode(line[1], propagationDelay, distance, msgProbability, msgLength, protocol);
             nodes.add(node);
             computeNodeCount++;
             nodeCount++;
