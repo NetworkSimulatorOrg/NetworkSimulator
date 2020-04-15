@@ -1,28 +1,27 @@
-import java.util.List;
-
 public class SlottedAloha extends Aloha implements Protocol{
 
     private int frameSize;
     private Object sync;
-    private Thread synchroning;
+    private Thread synchronizing;
+    private volatile boolean synchronizingRunning;
 
     public SlottedAloha(int frameSize){
         this.frameSize = frameSize;
         sync = new Object();
 
-        synchroning = new Thread(this::synchronizeThread);
+        synchronizing = new Thread(this::synchronizeThread);
     }
 
     private void synchronizeThread() {
         // After waiting
-        var run = true;
-        while(run) {
+        synchronizingRunning = true;
+        while(synchronizingRunning) {
             sync.notifyAll();
 
             try {
                 Thread.sleep(frameSize * 100);
             } catch (InterruptedException e) {
-                run = false;
+                synchronizingRunning = false;
             }
         }
     }
@@ -40,15 +39,16 @@ public class SlottedAloha extends Aloha implements Protocol{
 
     @Override
     public ProtocolState run() {
-        synchroning.start();
+        synchronizing.start();
         return ProtocolState.Success;
     }
 
     @Override
     public ProtocolState terminateThreads() {
-        if(synchroning != null) {
-            synchroning.interrupt();
+        if(synchronizing != null) {
+            synchronizing.interrupt();
         }
+        synchronizingRunning = false;
         return ProtocolState.Success;
     }
 }

@@ -12,31 +12,7 @@ public class Aloha implements Protocol {
 
         // Keep resending the message until there is no collision
         while (true){
-            // Handle node state
-            node.setSending(true);
-
-            StringBuilder builder = new StringBuilder();
-            builder.append("Compute ");
-            builder.append(node.getId());
-            builder.append(": Generating message\n");
-            builder.append(msg.toString("\t"));
-
-            // Send to all nodes
-            for(Node adjacent : node.adjacent) {
-                node.sendMsg(msg, adjacent.getId());
-                builder.append("\t To ");
-                builder.append(adjacent.getId());
-                builder.append("\n");
-            }
-
-            System.out.println(builder.toString());
-
-
-            // Wait the sending thread so that it doesn't try to send another until the first one has been received by every node.
-            node.sendingDelay(msg);
-
-            // Handle node state
-            node.setSending(false);
+            Protocol.sendMsgHelper(node, msg);
 
             // Check if this message collided
             if (msg.isCorrupt()){
@@ -47,8 +23,7 @@ public class Aloha implements Protocol {
                 int delay = (int) (Math.random() * Network.computeNodeCount * node.longestDistance * node.propagationRate);
                 System.out.println("Node " + node.getId() + " will be delayed for " + delay + " ms.");
                 Thread.sleep(delay);
-                msg.uncorrupt();
-                msg.resetNodesRemaining();
+                msg.prepareForRetransmission();
             }
             else{
                 // Send a report that the message was successfully received by all nodes.

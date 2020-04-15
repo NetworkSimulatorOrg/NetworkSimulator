@@ -15,7 +15,7 @@ public class ConnectNode extends Node {
         builder.append("Connect ");
         builder.append(getId());
         builder.append(": Repeating message\n");
-        builder.append(msg.toString("\t"));
+        builder.append(msg.toString("\t", getId()));
 
         for(Node node : adjacent) {
             if (!node.getId().equals(lastSender)) {
