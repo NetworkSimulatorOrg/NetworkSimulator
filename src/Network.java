@@ -8,9 +8,9 @@ import static java.lang.Thread.*;
 
 public class Network {
 
-    public static int computeNodeCount = 0, nodeCount = 0;
     private int msgLength, distance;
     private double propagationDelay, msgProbability;
+    public static int computeNodeCount = 0, nodeCount = 0, longestPath = 0;
     private Protocol protocol;
     private List<Node> nodes;
     public static CSVWriter writer;
@@ -114,6 +114,9 @@ public class Network {
             if (node instanceof ComputeNode){
                 ((ComputeNode)node).setLastSenderStructureSize(nodeCount);
                 node.longestDistance = findLongestDistance((ComputeNode)node, node, node);
+                if (node.longestDistance > longestPath){
+                    longestPath = node.longestDistance / propagationRate;
+                }
 
                 System.out.println(node.id + ": " + node.longestDistance);
             }
