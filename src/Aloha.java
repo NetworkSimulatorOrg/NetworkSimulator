@@ -17,7 +17,7 @@ public class Aloha implements Protocol {
             // Check if this message collided
             if (msg.isCorrupt()){
                 // Report this as a collision
-                sendReport(ReportType.Collision, msg, node.getId());
+                Protocol.sendReport(ReportType.Collision, msg, node.getId());
                 
                 // Resend the message at some future time.
                 int delay = (int) (Math.random() * Network.computeNodeCount * node.longestDistance * node.propagationRate);
@@ -27,7 +27,7 @@ public class Aloha implements Protocol {
             }
             else{
                 // Send a report that the message was successfully received by all nodes.
-                sendReport(ReportType.Successful, msg, node.getId());
+                Protocol.sendReport(ReportType.Successful, msg, node.getId());
                 break;
             }
 
@@ -65,11 +65,5 @@ public class Aloha implements Protocol {
     @Override
     public ProtocolState terminateThreads() {
         return null;
-    }
-
-    public void sendReport(ReportType type, Message msg, String sender) {
-        Report report = new Report(type, sender, msg);
-        // Send report to network.
-        Network.network.sendReport(report);
     }
 }
