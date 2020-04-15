@@ -7,16 +7,15 @@ public class Node {
     private Integer receivingCount;
     protected final List<Node> adjacent;
     protected DeltaList sleepList;
-    protected double propagationRate;
-    protected double distance;
-    protected double longestDistance;
+    protected int propagationRate;
+    protected int distance, longestDistance;
     protected long delay = 1000;
     protected Thread receivingThread = null;
     protected Thread sendingThread = null;
     protected volatile boolean receivingRunning = false;
     protected volatile boolean sendingRunning = false;
 
-    public Node(String id, double propagationRate, double distance) {
+    public Node(String id, int propagationRate, int distance) {
         this.id = id;
         this.sending = false;
         this.receivingCount = 0;

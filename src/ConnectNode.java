@@ -1,6 +1,6 @@
 public class ConnectNode extends Node {
 
-    public ConnectNode(String id, double propagationRate, double distance) {
+    public ConnectNode(String id, int propagationRate, int distance) {
         super(id, propagationRate, distance);
 
         // Create necessary threads
