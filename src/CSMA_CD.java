@@ -2,6 +2,14 @@ public class CSMA_CD extends Aloha implements Protocol {
 
     @Override
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
+
+        /*
+         * Notes:
+         * Before sending, probe for messages. Maybe check incoming queue?
+         * While waiting for responses, at the first collision detection, stop waiting.
+         */
+
+
         return null;
     }
 

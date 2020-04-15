@@ -1,28 +1,23 @@
 import java.util.Random;
 
 public class ComputeNode extends Node {
-    private double msgProbability;
     private int msgLength;
     private Protocol protocol;
     private Message sendingMsg;
-    private Random rand;
     protected String[] lastSenderStructure;
 
     private int sequenceNumber;
 
-    public ComputeNode(String id, double propagationRate, double distance, double msgProbability, int msgLength, Protocol protocol) {
+    public ComputeNode(String id, int propagationRate, int distance, int msgLength, Protocol protocol) {
         super(id, propagationRate, distance);
-        this.msgProbability = msgProbability;
         this.msgLength = msgLength;
         this.protocol = protocol;
-        this.rand = new Random();
+        this.sequenceNumber = 0;
 
         // Create necessary threads
         sendingThread = new Thread(this::startSendMsgThread);
         receivingThread = new Thread(this::recvMsgThread);
 
-        // @TODO Figure out how we want to do sequence numbers
-        this.sequenceNumber = 0;
     }
 
     private void nextMsg() {

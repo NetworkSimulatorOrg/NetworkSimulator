@@ -38,6 +38,13 @@ public interface Protocol {
         // Handle node state
         node.setSending(false);
     }
+    
+
+    static void sendReport(ReportType type, Message msg, String sender) {
+        Report report = new Report(type, sender, msg);
+        // Send report to network.
+        Network.network.sendReport(report);
+    }
 
 
     /*
