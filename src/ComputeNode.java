@@ -12,13 +12,12 @@ public class ComputeNode extends Node {
         super(id, propagationRate, distance);
         this.msgLength = msgLength;
         this.protocol = protocol;
+        this.sequenceNumber = 0;
 
         // Create necessary threads
         sendingThread = new Thread(this::startSendMsgThread);
         receivingThread = new Thread(this::recvMsgThread);
 
-        // @TODO Figure out how we want to do sequence numbers
-        this.sequenceNumber = 0;
     }
 
     private void nextMsg() {

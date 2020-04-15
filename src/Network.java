@@ -8,8 +8,8 @@ import static java.lang.Thread.*;
 
 public class Network {
 
-    public static int computeNodeCount = 0, nodeCount = 0, longestPath = 0;
-    private int msgLength, distance, propagationRate;
+    public static int computeNodeCount = 0, nodeCount = 0, longestDistance = 0, propagationRate;
+    private int msgLength, distance;
     private Protocol protocol;
     private List<Node> nodes;
     public static CSVWriter writer;
@@ -22,7 +22,7 @@ public class Network {
         writer.openFile();
 
         //Protocol protocol = new Aloha();
-        Protocol protocol = new Aloha();
+        Protocol protocol = new SlottedAloha();
         network = new Network(protocol);
         network.buildNodesFromFile("complex-network.txt");
         network.run();
@@ -113,8 +113,8 @@ public class Network {
             if (node instanceof ComputeNode){
                 ((ComputeNode)node).setLastSenderStructureSize(nodeCount);
                 node.longestDistance = findLongestDistance((ComputeNode)node, node, node);
-                if (node.longestDistance > longestPath){
-                    longestPath = node.longestDistance / propagationRate;
+                if (node.longestDistance > longestDistance){
+                    longestDistance = node.longestDistance;
                 }
 
                 System.out.println(node.id + ": " + node.longestDistance);
