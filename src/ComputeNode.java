@@ -92,4 +92,7 @@ public class ComputeNode extends Node {
         lastSenderStructure = new String[size];
     }
 
+    public String[] getLastSenderStructure() {
+        return lastSenderStructure;
+    }
 }
