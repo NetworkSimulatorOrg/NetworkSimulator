@@ -39,18 +39,6 @@ public interface Protocol {
         node.setSending(false);
     }
 
-    static void recvMsgHelper(Node node, Message msg) {
-        System.out.println("Node " + node.getId() + " receiving " + msg.getPayload());
-        // Check if this node is sending
-        if (node instanceof ComputeNode && node.isSending()){
-            // This message that has been received and the message being sent by this node are corrupt.
-            msg.setCorrupt();
-            ((ComputeNode)node).setSendingCorrupt();
-        }
-
-        msg.received();
-    }
-    
 
     static void sendReport(ReportType type, Message msg, String sender) {
         Report report = new Report(type, sender, msg);
@@ -67,7 +55,20 @@ public interface Protocol {
      * Returns FAILURE if failed reception.
      * Returns ERROR if an error occured.
      */
-    ProtocolState recvMsg(Node node, Message msg);
+    ProtocolState recvMsg(Node node, Message msg) throws InterruptedException;
+
+    static void recvMsgHelper(Node node, Message msg) {
+        System.out.println("Node " + node.getId() + " receiving " + msg.getPayload());
+        // Check if this node is sending
+        if (node instanceof ComputeNode && node.isSending()){
+            // This message that has been received and the message being sent by this node are corrupt.
+            msg.setCorrupt();
+            ((ComputeNode)node).setSendingCorrupt();
+        }
+
+        msg.received();
+    }
+
 
     ProtocolState run();
     ProtocolState terminateThreads();
