@@ -83,6 +83,10 @@ public class Node {
         return id;
     }
 
+    public int getIdNumber() {
+        return Integer.parseInt(getId());
+    }
+
     // This is only used for ComputeNode's
     public void sendingDelay(Message msg) throws InterruptedException {
         // Wait until the message has reached every node
