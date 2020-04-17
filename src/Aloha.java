@@ -39,20 +39,11 @@ public class Aloha implements Protocol {
 
     @Override
     public ProtocolState recvMsg(Node node, Message msg) {
-        System.out.println("Node " + node.getId() + " receiving " + msg.getPayload());
-        // Check if this node is sending
-        if (node instanceof ComputeNode && node.isSending()){
-            // This message that has been received and the message being sent by this node are corrupt.
-            msg.setCorrupt();
-            ((ComputeNode)node).setSendingCorrupt();
-
-            // Aloha does not stop sending the outgoing message. Do not end the sending delay.
-        }
-
-        msg.received();
+        Protocol.recvMsgHelper(node, msg);
 
         // Check for corruption and collision
         if(msg.isCorrupt())
+            // Aloha does not stop sending the outgoing message. Do not end the sending delay.
             return ProtocolState.Failure;
         return ProtocolState.Success;
     }

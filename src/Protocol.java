@@ -38,6 +38,18 @@ public interface Protocol {
         // Handle node state
         node.setSending(false);
     }
+
+    static void recvMsgHelper(Node node, Message msg) {
+        System.out.println("Node " + node.getId() + " receiving " + msg.getPayload());
+        // Check if this node is sending
+        if (node instanceof ComputeNode && node.isSending()){
+            // This message that has been received and the message being sent by this node are corrupt.
+            msg.setCorrupt();
+            ((ComputeNode)node).setSendingCorrupt();
+        }
+
+        msg.received();
+    }
     
 
     static void sendReport(ReportType type, Message msg, String sender) {

@@ -25,8 +25,13 @@ public class TokenPassing implements Protocol {
 
     @Override
     public ProtocolState recvMsg(Node node, Message msg) {
-        //return super.recvMsg(node, msg);
-        return null;
+        Protocol.recvMsgHelper(node, msg);
+
+        // Check for corruption and collision
+        if (msg.isCorrupt())
+            // Aloha does not stop sending the outgoing message. Do not end the sending delay.
+            return ProtocolState.Failure;
+        return ProtocolState.Success;
     }
 
     @Override
