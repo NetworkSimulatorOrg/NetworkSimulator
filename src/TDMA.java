@@ -1,6 +1,8 @@
+import java.util.List;
+
 public class TDMA implements Protocol {
+    private List<Node> nodeList;
     private int frameSize;
-    private int nodeCount;
     private volatile Integer[] sync;
     private Thread synchronizing;
     private long timeoutEST;
@@ -20,12 +22,14 @@ public class TDMA implements Protocol {
      *      This allows us not to configure the network to where we must provide a number to ensure the package is sent.
      */
 
-    public TDMA(int frameSize, int nodeCount) {
+    public TDMA(int frameSize, List<Node> nodeList) {
         this.frameSize = frameSize;
-        this.nodeCount = nodeCount;
-        sync = new Integer[nodeCount];
-        for(int i = 0; i < nodeCount; i++) {
+        this.nodeList = nodeList;
+        sync = new Integer[nodeList.size()];
+        for(int i = 0; i < nodeList.size(); i++) {
             sync[i] = 0;
+            if(nodeList.get(i) instanceof ConnectNode)
+                sync[i] = -1;
         }
 
         synchronizing = new Thread(this::synchronizeThread);
@@ -48,7 +52,7 @@ public class TDMA implements Protocol {
                     timeoutEST = (long) ((1 - alpha) * timeoutEST + alpha * (now - then));
                     timeoutDEV = (long) ((1 - beta) * timeoutDEV + beta * Math.abs(now - then - timeoutEST));
 
-                } else {
+                } else if (sync[step] != -1){
                     Thread.sleep(timeoutDEV * 4 + timeoutEST);
                 }
             } catch (InterruptedException e) {
@@ -56,19 +60,19 @@ public class TDMA implements Protocol {
             } finally {
                 sync[step] = 0;
             }
-            step = (step + 1) % nodeCount;
+            step = (step + 1) % this.nodeList.size();
         }
     }
 
     @Override
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
-        sync[Integer.parseInt(node.getId())] = 1;
-        sync[Integer.parseInt(node.getId())].wait();
+        sync[node.getIdNumber()] = 1;
+        sync[node.getIdNumber()].wait();
 
         // Send message
         Protocol.sendMsgHelper(node, msg);
 
-        sync[Integer.parseInt(node.getId())].notify();
+        sync[node.getIdNumber()].notify();
         return null;
     }
 
