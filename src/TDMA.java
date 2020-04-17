@@ -2,14 +2,14 @@ import java.util.List;
 
 public class TDMA implements Protocol {
     private List<Node> nodeList;
-    private int frameSize;
     private volatile Integer[] sync;
+    private volatile Integer[] threads;
     private Thread synchronizing;
-    private long timeoutEST;
-    private long timeoutDEV;
-    private double alpha = 0.125;
-    private double beta = 0.25;
     private volatile boolean synchronizingRunning;
+    private long timeoutEST = 0;
+    private long timeoutDEV = 0;
+    private final double alpha = 0.125;
+    private final double beta = 0.25;
 
     /* TDMA structure
      * Use an array, one entry per node
@@ -22,14 +22,16 @@ public class TDMA implements Protocol {
      *      This allows us not to configure the network to where we must provide a number to ensure the package is sent.
      */
 
-    public TDMA(int frameSize, List<Node> nodeList) {
-        this.frameSize = frameSize;
+    public TDMA(List<Node> nodeList) {
         this.nodeList = nodeList;
         sync = new Integer[nodeList.size()];
+        threads = new Integer[nodeList.size()];
         for(int i = 0; i < nodeList.size(); i++) {
             sync[i] = 0;
-            if(nodeList.get(i) instanceof ConnectNode)
+            threads[i] = 0;
+            if(nodeList.get(i) instanceof ConnectNode) {
                 sync[i] = -1;
+            }
         }
 
         synchronizing = new Thread(this::synchronizeThread);
@@ -41,24 +43,31 @@ public class TDMA implements Protocol {
         int step = 0;
         while(synchronizingRunning) {
             try {
-                if (sync[step] == 1) {
+                if (threads[step] == 1) {
                     long then = System.currentTimeMillis();
 
-                    sync[step].notify();
+                    synchronized (threads[step]) {
+                        threads[step] = 0;
+                        threads[step].notify();
+                    }
+
                     Thread.yield();
-                    sync[step].wait();
+
+                    synchronized (sync[step]) {
+                        sync[step].wait();
+                    }
 
                     long now = System.currentTimeMillis();
                     timeoutEST = (long) ((1 - alpha) * timeoutEST + alpha * (now - then));
                     timeoutDEV = (long) ((1 - beta) * timeoutDEV + beta * Math.abs(now - then - timeoutEST));
 
-                } else if (sync[step] != -1){
-                    Thread.sleep(timeoutDEV * 4 + timeoutEST);
+                } else if (sync[step] != -1) {
+                    System.out.println("System sleeping for " + (timeoutDEV + timeoutEST) + " milliseconds");
+                    Thread.sleep(timeoutDEV + timeoutEST);
                 }
-            } catch (InterruptedException e) {
+            } catch (/*Interrupted*/Exception e) {
+                e.printStackTrace();
                 synchronizingRunning = false;
-            } finally {
-                sync[step] = 0;
             }
             step = (step + 1) % this.nodeList.size();
         }
@@ -66,14 +75,20 @@ public class TDMA implements Protocol {
 
     @Override
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
-        sync[node.getIdNumber()] = 1;
-        sync[node.getIdNumber()].wait();
+        int idNumber = node.getIdNumber();
+        synchronized (threads[idNumber]) {
+            threads[idNumber] = 1;
+            threads[idNumber].wait();
+        }
 
-        // Send message
+            // Send message
         Protocol.sendMsgHelper(node, msg);
 
-        sync[node.getIdNumber()].notify();
-        return null;
+        synchronized (sync[idNumber]) {
+            sync[idNumber].notify();
+        }
+
+        return ProtocolState.Success;
     }
 
     @Override
