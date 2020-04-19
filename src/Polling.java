@@ -1,6 +1,7 @@
+import java.util.concurrent.SynchronousQueue;
+
 public class Polling implements Protocol {
-    private volatile Integer sync;
-    private volatile Object wakeUp;
+    private final SynchronousQueue<Message> messages;
     private Thread synchronizing;
     private volatile boolean synchronizingRunning;
 
@@ -14,8 +15,7 @@ public class Polling implements Protocol {
      */
 
     public Polling() {
-        sync = 0;
-        wakeUp = new Object();
+        messages = new SynchronousQueue<>();
 
         synchronizing = new Thread(this::synchronizeThread);
     }
@@ -23,34 +23,30 @@ public class Polling implements Protocol {
     private void synchronizeThread() {
         // After waiting
         synchronizingRunning = true;
-        while(synchronizingRunning) {
-            if (sync > 0) {
-                try {
-                    synchronized (sync) {
-                        sync--;
-                    }
-                    sync.notify();
-                    wakeUp.wait();
-                } catch (InterruptedException e) {
-                    synchronizingRunning = false;
-                } finally {
+        while (synchronizingRunning) {
+            try {
+                var msg = messages.take();
+                Protocol.sendMsgHelper(Network.network.getNodeById(msg.getSender()), msg);
+
+                synchronized (messages) {
+                    messages.notify();
                 }
+
+            } catch (InterruptedException e) {
+                synchronizingRunning = false;
             }
         }
     }
 
     @Override
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
-        synchronized (sync) {
-            sync++;
+        messages.put(msg);
+
+        synchronized (messages) {
+            messages.wait();
         }
-        sync.wait();
 
-        // Send message
-        Protocol.sendMsgHelper(node, msg);
-
-        wakeUp.notify();
-        return null;
+        return ProtocolState.Success;
     }
 
     @Override
