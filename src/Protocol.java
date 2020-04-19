@@ -37,6 +37,16 @@ public interface Protocol {
 
         // Handle node state
         node.setSending(false);
+
+        // Check if this message collided
+        if (msg.isCorrupt()) {
+            // Report this as a collision
+            Protocol.sendReport(ReportType.Collision, msg, node.getId());
+        } else {
+            // Send a report that the message was successfully received by all nodes.
+            Protocol.sendReport(ReportType.Successful, msg, node.getId());
+        }
+
     }
 
 

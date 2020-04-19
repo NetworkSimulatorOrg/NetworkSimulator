@@ -41,9 +41,6 @@ public class SlottedAloha extends Aloha implements Protocol{
 
             // Check if this message collided
             if (msg.isCorrupt()){
-                // Report this as a collision
-                Protocol.sendReport(ReportType.Collision, msg, node.getId());
-                
                 // Resend the message at some future time.
                 int delay = (int) (Math.random() * Network.computeNodeCount * node.longestDistance * node.propagationRate);
                 System.out.println("Node " + node.getId() + " will be delayed for " + delay + " ms.");
@@ -51,8 +48,6 @@ public class SlottedAloha extends Aloha implements Protocol{
                 msg.prepareForRetransmission();
             }
             else{
-                // Send a report that the message was successfully received by all nodes.
-                Protocol.sendReport(ReportType.Successful, msg, node.getId());
                 break;
             }
 
