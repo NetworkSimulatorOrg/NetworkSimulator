@@ -21,7 +21,6 @@ public class Network {
         writer = new CSVWriter("csvOutput.csv");
         writer.openFile();
 
-        //Protocol protocol = new Aloha();
         network = new Network();
         network.buildNodesFromFile("simple-network.txt");
 
@@ -31,7 +30,7 @@ public class Network {
         network.run();
 
         try {
-            sleep(1000 * 30);
+            sleep(1000 * 10);
         } catch(InterruptedException e) {
             System.out.println("main: interrupted");
         } finally {
@@ -61,6 +60,10 @@ public class Network {
                 ((ComputeNode) node).setProtocol(protocol);
             }
         }
+    }
+
+    public Node getNodeByIdNumber(int idNumber) {
+        return getNodeById(Integer.toString(idNumber));
     }
 
     public Node getNodeById(String id) {

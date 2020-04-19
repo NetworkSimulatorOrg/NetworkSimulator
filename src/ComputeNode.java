@@ -38,12 +38,12 @@ public class ComputeNode extends Node {
     private void startSendMsgThread(){
         try{
             Thread.sleep(200);
-            // Prepare the first message sent from the node
-            nextMsg();
-            sendMsgThread();
         } catch (Exception e) {
 
         }
+        // Prepare the first message sent from the node
+        nextMsg();
+        sendMsgThread();
     }
 
     private void sendMsgThread() {
@@ -60,7 +60,8 @@ public class ComputeNode extends Node {
                 // TODO: Randomize delay
                 Thread.sleep(delay);
             } catch (/*Interrupted*/Exception e) {
-                e.printStackTrace();
+                if(!(e instanceof InterruptedException))
+                    e.printStackTrace();
                 run = false;
             }
         }
@@ -78,8 +79,7 @@ public class ComputeNode extends Node {
                 }
 
             } catch (Exception e) {
-                //System.out.println(e.toString());
-                //e.printStackTrace(System.out);
+                e.printStackTrace();
                 sendingRunning = false;
             }
         }
