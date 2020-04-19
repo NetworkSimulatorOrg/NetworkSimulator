@@ -22,9 +22,12 @@ public class Network {
         writer.openFile();
 
         //Protocol protocol = new Aloha();
-        Protocol protocol = new SlottedAloha();
-        network = new Network(protocol);
-        network.buildNodesFromFile("complex-network.txt");
+        network = new Network();
+        network.buildNodesFromFile("simple-network.txt");
+
+        Protocol protocol = new TDMA(network.nodes);
+        network.setProtocol(protocol);
+
         network.run();
 
         try {
@@ -33,17 +36,31 @@ public class Network {
             System.out.println("main: interrupted");
         } finally {
             System.out.println("ENDING");
-            network.stop();
             writer.closeFile();
+            network.stop();
         }
     }
 
-    public Network(Protocol protocol){
+    public Network() {
         msgLength = 20;
         distance = 5;
         propagationRate = 20;
         nodes = new ArrayList<>();
+    }
+
+    public Network(Protocol protocol){
+        this();
         this.protocol = protocol;
+    }
+
+    public void setProtocol(Protocol protocol) {
+        this.protocol = protocol;
+
+        for(var node : nodes) {
+            if(node instanceof ComputeNode) {
+                ((ComputeNode) node).setProtocol(protocol);
+            }
+        }
     }
 
     public Node getNodeById(String id) {

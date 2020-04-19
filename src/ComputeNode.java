@@ -20,6 +20,10 @@ public class ComputeNode extends Node {
 
     }
 
+    public void setProtocol(Protocol protocol) {
+        this.protocol = protocol;
+    }
+
     private void nextMsg() {
         // The message will just contain the node's unique character repeatedly
         StringBuilder payload = new StringBuilder();
@@ -56,7 +60,7 @@ public class ComputeNode extends Node {
                 // TODO: Randomize delay
                 Thread.sleep(delay);
             } catch (/*Interrupted*/Exception e) {
-                System.out.println(e.toString());
+                e.printStackTrace();
                 run = false;
             }
         }
