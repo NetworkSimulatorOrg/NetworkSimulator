@@ -5,7 +5,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public class TDMA implements Protocol {
     private List<Node> nodeList;
     private Message[] messages;
-    private Boolean[] computeNode;
     private Thread synchronizing;
     private volatile boolean synchronizingRunning;
     private long timeoutEST = 0;
@@ -27,15 +26,9 @@ public class TDMA implements Protocol {
     public TDMA(List<Node> nodeList) {
         this.nodeList = nodeList;
         messages = new Message[nodeList.size()];
-        computeNode = new Boolean[nodeList.size()];
         for (int i = 0; i < nodeList.size(); i++) {
             int index = nodeList.get(i).getIdNumber();
             messages[index] = null;
-            if (nodeList.get(i) instanceof ComputeNode) {
-                computeNode[index] = true;
-            } else {
-                computeNode[index] = false;
-            }
         }
 
         synchronizing = new Thread(this::synchronizeThread);
@@ -46,7 +39,7 @@ public class TDMA implements Protocol {
         synchronizingRunning = true;
         for(int step = 0; synchronizingRunning; step = (step + 1) % this.nodeList.size()) {
             try {
-                if(!computeNode[step]) continue;
+                if (nodeList.get(step) instanceof ConnectNode) continue;
                 if(messages[step] == null) {
                     System.out.println("System sleeping for " + (timeoutDEV + timeoutEST) + " milliseconds");
                     Thread.sleep(timeoutDEV + timeoutEST);
@@ -82,7 +75,7 @@ public class TDMA implements Protocol {
             messages[idNumber].wait();
         }
 
-        return ProtocolState.Success;
+        return msg.isCorrupt() ? ProtocolState.Failure : ProtocolState.Success;
     }
 
     @Override

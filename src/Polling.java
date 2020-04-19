@@ -46,7 +46,7 @@ public class Polling implements Protocol {
             messages.wait();
         }
 
-        return ProtocolState.Success;
+        return msg.isCorrupt() ? ProtocolState.Failure : ProtocolState.Success;
     }
 
     @Override

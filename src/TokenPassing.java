@@ -74,7 +74,7 @@ public class TokenPassing implements Protocol {
             sync[idNumber] = 0;
         }
 
-        return ProtocolState.Success;
+        return msg.isCorrupt() ? ProtocolState.Failure : ProtocolState.Success;
     }
 
     @Override
