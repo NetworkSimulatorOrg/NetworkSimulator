@@ -18,19 +18,59 @@ public class Network {
     
     // Arguments: protocol
     public static void main(String[] args){
-        writer = new CSVWriter("csvOutput.csv");
+        /*
+        // For serious data generation
+        String[] protocols = {"aloha", "slottedaloha", "cdma/cd", "tdma", "polling", "tokenpassing"};
+        String[] networks = {"simple-network", "middling-network", "complex-network"};
+
+        for(var network : networks) {
+            for(var protocol : protocols) {
+                runner(network + ".txt", "csv_" + network + "_" + protocol + ".csv", protocol, 1000 * 10);
+            }
+        }
+         */
+        // Else
+        String protocol = "slottedaloha";
+        runner("complex-network.txt", "csv_complex-network_" + protocol + ".csv", protocol, 1000 * 10);
+    }
+
+    public static void runner(String adjacencyList, String outputFile, String networkProtocol, long timeout) {
+        writer = new CSVWriter(outputFile);
         writer.openFile();
 
         network = new Network();
-        network.buildNodesFromFile("simple-network.txt");
+        network.buildNodesFromFile(adjacencyList);
 
-        Protocol protocol = new TDMA(network.nodes);
+        Protocol protocol;
+        switch(networkProtocol.toUpperCase()) {
+            case "ALOHA":
+                protocol = new Aloha();
+                break;
+            case "SLOTTEDALOHA":
+                protocol = new SlottedAloha();
+                break;
+            case "CDMA/CD":
+                protocol = new CDMA_CD();
+                break;
+            case "POLLING":
+                protocol = new Polling();
+                break;
+            case "TDMA":
+                protocol = new TDMA(network.nodes);
+                break;
+            case "TOKENPASSING":
+                protocol = new TokenPassing(network.nodes);
+                break;
+            default:
+                System.out.println("Unrecognized Protocol Name: " + networkProtocol);
+                return;
+        }
         network.setProtocol(protocol);
 
         network.run();
 
         try {
-            sleep(1000 * 10);
+            sleep(timeout);
         } catch(InterruptedException e) {
             System.out.println("main: interrupted");
         } finally {
