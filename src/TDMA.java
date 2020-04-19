@@ -4,7 +4,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class TDMA implements Protocol {
     private List<Node> nodeList;
-    private Lock[] sync;
+    private Message[] messages;
+    private Boolean[] computeNode;
     private Thread synchronizing;
     private volatile boolean synchronizingRunning;
     private long timeoutEST = 0;
@@ -25,13 +26,15 @@ public class TDMA implements Protocol {
 
     public TDMA(List<Node> nodeList) {
         this.nodeList = nodeList;
-        sync = new Lock[nodeList.size()];
-        for(int i = 0; i < nodeList.size(); i++) {
+        messages = new Message[nodeList.size()];
+        computeNode = new Boolean[nodeList.size()];
+        for (int i = 0; i < nodeList.size(); i++) {
             int index = nodeList.get(i).getIdNumber();
-            sync[index] = null;
-            if(nodeList.get(i) instanceof ComputeNode) {
-                sync[index] = new ReentrantLock();
-                sync[index].lock();
+            messages[index] = null;
+            if (nodeList.get(i) instanceof ComputeNode) {
+                computeNode[index] = true;
+            } else {
+                computeNode[index] = false;
             }
         }
 
@@ -41,19 +44,23 @@ public class TDMA implements Protocol {
     private void synchronizeThread() {
         // After waiting
         synchronizingRunning = true;
-        int step = 0;
-        while(synchronizingRunning) {
+        for(int step = 0; synchronizingRunning; step = (step + 1) % this.nodeList.size()) {
             try {
-                if(sync[step] == null) continue;
-                sync[step].unlock();
-                if(sync[step].tryLock()) {
+                if(!computeNode[step]) continue;
+                if(messages[step] == null) {
                     System.out.println("System sleeping for " + (timeoutDEV + timeoutEST) + " milliseconds");
                     Thread.sleep(timeoutDEV + timeoutEST);
                 } else {
                     long then = System.currentTimeMillis();
 
                     // Resynchronize
-                    sync[step].lock();
+                    Protocol.sendMsgHelper(Network.network.getNodeById(messages[step].getSender()), messages[step]);
+
+                    assert messages[step] != null;
+                    synchronized (messages[step]) {
+                        messages[step].notify();
+                        messages[step] = null;
+                    }
 
                     long now = System.currentTimeMillis();
                     timeoutEST = (long) ((1 - alpha) * timeoutEST + alpha * (now - then));
@@ -63,19 +70,17 @@ public class TDMA implements Protocol {
                 e.printStackTrace();
                 synchronizingRunning = false;
             }
-            step = (step + 1) % this.nodeList.size();
         }
     }
 
     @Override
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
         int idNumber = node.getIdNumber();
-        sync[idNumber].lock();
+        messages[idNumber] = msg;
 
-        // Send message
-        Protocol.sendMsgHelper(node, msg);
-
-        sync[idNumber].unlock();
+        synchronized (messages[idNumber]) {
+            messages[idNumber].wait();
+        }
 
         return ProtocolState.Success;
     }
