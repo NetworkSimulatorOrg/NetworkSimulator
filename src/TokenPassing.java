@@ -1,10 +1,15 @@
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class TokenPassing implements Protocol {
     private final List<Node> nodeList;
+    private Lock lock;
     private int sequenceNumber;
+    private boolean force;
     private Node nextSender;
     private volatile Integer[] sync;
+    private volatile Object[] waitToFinish;
 
     /* Token Passing structure
      * Use an array, one entry per node
@@ -18,10 +23,13 @@ public class TokenPassing implements Protocol {
      */
 
     public TokenPassing(List<Node> nodeList) {
+        this.lock = new ReentrantLock();
         this.nodeList = nodeList;
         this.sequenceNumber = 100;
+        this.force = true;
 
         sync = new Integer[Network.nodeCount];
+        waitToFinish = new Object[Network.nodeCount];
         for(int i = 0; i < nodeList.size(); i++) {
             sync[i] = 0;
             if(nodeList.get(i) instanceof ConnectNode)
@@ -29,34 +37,44 @@ public class TokenPassing implements Protocol {
         }
     }
 
-    private int nextComputeNode(int index) {
+    private Node nextComputeNode(Node node) {
+        int index = nodeList.indexOf(node);
         do {
             index = (index+1)%nodeList.size();
         }
-        while(sync[index] == -1);
-        return index;
+        while(nodeList.get(index) instanceof ConnectNode);
+        return nodeList.get(index);
     }
 
     private void passToken(Node node) throws InterruptedException {
         ComputeNode compute = (ComputeNode) node;
-        nextSender = nodeList.get(nextComputeNode(node.getIdNumber()));
+        nextSender = nextComputeNode(node);
         Protocol.sendMsgHelper(node, new Message(node.getId(), sequenceNumber++, "Next Sender:" + nextSender.getId(), compute.getLastSenderStructure()));
     }
 
     @Override
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
+        int idNumber = node.getIdNumber();
         // Set data send flag
-        sync[node.getIdNumber()] = 1;
         // Wait for permission
-        sync[node.getIdNumber()].wait();
+        sync[idNumber] = 1;
+        if(force) {
+            force = false;
+        } else {
+            synchronized (sync[idNumber]) {
+                sync[idNumber].wait();
+            }
+        }
 
-        Protocol.sendMsgHelper(node, msg);
+        synchronized (lock) {
+            Protocol.sendMsgHelper(node, msg);
 
-        passToken(node);
+            passToken(node);
 
-        sync[node.getIdNumber()].notify();
+            sync[idNumber] = 0;
+        }
 
-        return null;
+        return ProtocolState.Success;
     }
 
     @Override
@@ -68,15 +86,17 @@ public class TokenPassing implements Protocol {
             // Aloha does not stop sending the outgoing message. Do not end the sending delay.
             return ProtocolState.Failure;
         } else if (msg.getPayload().equals("Next Sender:" + node.getId())) {
-            // Wait until sender is done sending
-            sync[Network.network.getNodeById(msg.getSender()).getIdNumber()].wait();
             int idNumber = node.getIdNumber();
 
             // See if has data to send
             if (sync[idNumber] == 1) {
-                sync[idNumber].notify();
+                synchronized (sync[idNumber]) {
+                    sync[idNumber].notify();
+                }
             } else {
-                passToken(nextSender);
+                synchronized (lock) {
+                    passToken(nextSender);
+                }
             }
         }
         return ProtocolState.Success;
