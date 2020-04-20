@@ -16,20 +16,27 @@ public interface Protocol {
         node.setSending(true);
 
         StringBuilder builder = new StringBuilder();
-        builder.append("Compute ");
-        builder.append(node.getId());
-        builder.append(": Generating message\n");
-        builder.append(msg.toString("\t", node.getId()));
+
+        if(Network.logToConsole) {
+            builder.append("Compute ");
+            builder.append(node.getId());
+            builder.append(": Generating message\n");
+            builder.append(msg.toString("\t", node.getId()));
+        }
 
         // Send to all nodes
         for (Node adjacent : node.adjacent) {
             node.sendMsg(msg, adjacent.getId());
-            builder.append("\t To ");
-            builder.append(adjacent.getId());
-            builder.append("\n");
+            if(Network.logToConsole) {
+                builder.append("\t To ");
+                builder.append(adjacent.getId());
+                builder.append("\n");
+            }
         }
 
-        System.out.println(builder.toString());
+        if(Network.logToConsole) {
+            System.out.println(builder.toString());
+        }
 
 
         // Wait the sending thread so that it doesn't try to send another until the first one has been received by every node.
@@ -68,7 +75,9 @@ public interface Protocol {
     ProtocolState recvMsg(Node node, Message msg) throws InterruptedException;
 
     static void recvMsgHelper(Node node, Message msg) {
-        System.out.println("Node " + node.getId() + " receiving " + msg.getPayload());
+        if(Network.logToConsole) {
+            System.out.println("Node " + node.getId() + " receiving " + msg.getPayload());
+        }
         // Check if this node is sending
         if (node instanceof ComputeNode && node.isSending()){
             // This message that has been received and the message being sent by this node are corrupt.

@@ -30,13 +30,17 @@ public class Report {
         }
     }
 
-    private void logSuccessful(CSVWriter writer){
-        System.out.println("Success: Node " + sender + "'s message was received by everyone.-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!");
+    private void logSuccessful(CSVWriter writer) {
+        if (Network.logToConsole) {
+            System.out.println("Success: Node " + sender + "'s message was received by everyone.-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!");
+        }
         writer.appendDataAsLine("Success", sender, Integer.toString(msg.getSequenceNumber()), Integer.toString(msg.getRepeatCount()), "\"" + msg.getPayload() + "\"");
     }
 
-    private void logCollision(CSVWriter writer){
-        System.out.println("Collision: " + msg.getPayload() + " collided with another message.");
+    private void logCollision(CSVWriter writer) {
+        if (Network.logToConsole) {
+            System.out.println("Collision: " + msg.getPayload() + " collided with another message.");
+        }
         writer.appendDataAsLine("Collision", sender, Integer.toString(msg.getSequenceNumber()), Integer.toString(msg.getRepeatCount()), "\"" + msg.getPayload() + "\"");
     }
 }

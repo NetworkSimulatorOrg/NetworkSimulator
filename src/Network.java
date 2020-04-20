@@ -14,6 +14,7 @@ public class Network {
     private List<Node> nodes;
     public static CSVWriter writer;
     public static Network network;
+    public static boolean logToConsole;
 
     
     // Arguments: protocol
@@ -22,6 +23,7 @@ public class Network {
         // For serious data generation
         String[] protocols = {"aloha", "slottedaloha", "cdma/cd", "tdma", "polling", "tokenpassing"};
         String[] networks = {"simple-network", "middling-network", "complex-network"};
+        logToConsole = false;
 
         for(var network : networks) {
             for(var protocol : protocols) {
@@ -30,11 +32,13 @@ public class Network {
         }
          */
         // Else
+        logToConsole = true;
         String protocol = "slottedaloha";
         runner("complex-network.txt", "csv_complex-network_" + protocol + ".csv", protocol, 1000 * 10);
     }
 
     public static void runner(String adjacencyList, String outputFile, String networkProtocol, long timeout) {
+        System.out.println("Running network: " + adjacencyList + " \ton protocol " + networkProtocol + " \tfor " + timeout + " ms \toutputted to " + outputFile);
         writer = new CSVWriter(outputFile);
         writer.openFile();
 
@@ -176,8 +180,6 @@ public class Network {
                 if (node.longestDistance > longestDistance){
                     longestDistance = node.longestDistance;
                 }
-
-                System.out.println(node.id + ": " + node.longestDistance);
             }
         }
     }

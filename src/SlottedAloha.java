@@ -43,7 +43,9 @@ public class SlottedAloha extends Aloha implements Protocol{
             if (msg.isCorrupt()){
                 // Resend the message at some future time.
                 int delay = (int) (Math.random() * Network.computeNodeCount * node.longestDistance * node.propagationRate);
-                System.out.println("Node " + node.getId() + " will be delayed for " + delay + " ms.");
+                if(Network.logToConsole) {
+                    System.out.println("Node " + node.getId() + " will be delayed for " + delay + " ms.");
+                }
                 Thread.sleep(delay);
                 msg.prepareForRetransmission();
             }

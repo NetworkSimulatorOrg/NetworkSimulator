@@ -12,20 +12,27 @@ public class ConnectNode extends Node {
         var lastSender = msg.getLastSender(id);
 
         StringBuilder builder = new StringBuilder();
-        builder.append("Connect ");
-        builder.append(getId());
-        builder.append(": Repeating message\n");
-        builder.append(msg.toString("\t", getId()));
+        if(Network.logToConsole) {
+            builder.append("Connect ");
+            builder.append(getId());
+            builder.append(": Repeating message\n");
+            builder.append(msg.toString("\t", getId()));
+        }
 
         for(Node node : adjacent) {
             if (!node.getId().equals(lastSender)) {
                 super.sendMsg(msg, node.getId());
-                builder.append("\t To ");
-                builder.append(node.getId());
-                builder.append("\n");
+                if(Network.logToConsole) {
+                    builder.append("\t To ");
+                    builder.append(node.getId());
+                    builder.append("\n");
+                }
             }
         }
-        System.out.println(builder.toString());
+
+        if(Network.logToConsole) {
+            System.out.println(builder.toString());
+        }
     }
 
     // This is not needed. Messages actually being passed between

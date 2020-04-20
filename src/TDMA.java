@@ -41,7 +41,9 @@ public class TDMA implements Protocol {
             try {
                 if (nodeList.get(step) instanceof ConnectNode) continue;
                 if(messages[step] == null) {
-                    System.out.println("System sleeping for " + (timeoutDEV + timeoutEST) + " milliseconds");
+                    if (Network.logToConsole) {
+                        System.out.println("System sleeping for " + (timeoutDEV + timeoutEST) + " milliseconds");
+                    }
                     Thread.sleep(timeoutDEV + timeoutEST);
                 } else {
                     long then = System.currentTimeMillis();
