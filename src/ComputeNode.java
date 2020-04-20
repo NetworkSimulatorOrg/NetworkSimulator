@@ -65,7 +65,7 @@ public class ComputeNode extends Node {
                 run = false;
             }
         }
-        System.out.println("Node " + getId() + " terminating sendMsgThread");
+        System.out.println("Compute Node " + getId() + " terminating sendMsgThread");
     }
 
     private void recvMsgThread() {
@@ -79,11 +79,13 @@ public class ComputeNode extends Node {
                 }
 
             } catch (Exception e) {
-                e.printStackTrace();
+                if(!(e instanceof InterruptedException)) {
+                    e.printStackTrace();
+                }
                 sendingRunning = false;
             }
         }
-        System.out.println("Node " + getId() + " terminating recvMsgThread");
+        System.out.println("Compute Node " + getId() + " terminating recvMsgThread");
     }
 
     public void setSendingCorrupt(){

@@ -53,11 +53,14 @@ public class ConnectNode extends Node {
                 }
 
                 //Thread.sleep(delay);
-            } catch(/*Interrupted*/Exception e) {
+            } catch(Exception e) {
+                if(!(e instanceof InterruptedException)) {
+                    e.printStackTrace();
+                }
                 receivingRunning = false;
             }
         }
 
-        System.out.println("Node " + getId() + " terminating recvMsgThread");
+        System.out.println("Connect Node " + getId() + " terminating recvMsgThread");
     }
 }
