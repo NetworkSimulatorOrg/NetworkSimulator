@@ -88,6 +88,7 @@ public class Network {
     }
 
     public Network() {
+        Node.resetIdNumbers();
         msgLength = 20;
         distance = 5;
         propagationRate = 20;
@@ -110,7 +111,18 @@ public class Network {
     }
 
     public Node getNodeByIdNumber(int idNumber) {
-        return getNodeById(Integer.toString(idNumber));
+        if (nodes.get(idNumber).getIdNumber() != idNumber) {
+            // Optimize for the case that nodes are saved in index order.
+            for (int i = 0; i < nodes.size(); i++) {
+                if (nodes.get(i).getIdNumber() == idNumber) {
+                    return nodes.get(i);
+                }
+            }
+            System.out.println("No node found with idNumber: " + idNumber);
+            return null;
+        } else {
+            return nodes.get(idNumber);
+        }
     }
 
     public Node getNodeById(String id) {
@@ -210,7 +222,7 @@ public class Network {
         // This does not allow for cycles
 
         // Set the original node's lastSenderStructure so that the current node's previous value is the previous node (Used in messages)
-        original.lastSenderStructure[Integer.parseInt(current.getId())] = previous.getId();
+        original.lastSenderStructure[current.getIdNumber()] = previous.getId();
 
         int max = 0;
         boolean isLeaf = true;

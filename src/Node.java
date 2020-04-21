@@ -2,7 +2,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Node {
-    protected final String id;
+    private static int count = 0;
+    private final String id;
+    private final int idNumber;
     private Boolean sending;
     private Integer receivingCount;
     protected final List<Node> adjacent;
@@ -17,6 +19,8 @@ public class Node {
 
     public Node(String id, int propagationRate, int distance) {
         this.id = id;
+        this.idNumber = count;
+        count++;
         this.sending = false;
         this.receivingCount = 0;
         this.adjacent = new ArrayList<>();
@@ -84,7 +88,11 @@ public class Node {
     }
 
     public int getIdNumber() {
-        return Integer.parseInt(getId());
+        return idNumber;
+    }
+
+    public static void resetIdNumbers() {
+        count = 0;
     }
 
     // This is only used for ComputeNode's

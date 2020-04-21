@@ -21,7 +21,7 @@ public interface Protocol {
             builder.append("Compute ");
             builder.append(node.getId());
             builder.append(": Generating message\n");
-            builder.append(msg.toString("\t", node.getId()));
+            builder.append(msg.toString("\t", node));
         }
 
         // Send to all nodes

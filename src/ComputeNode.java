@@ -32,7 +32,7 @@ public class ComputeNode extends Node {
             payload.append(getId());
         }
 
-        this.sendingMsg = new Message(id, this.sequenceNumber++, payload.toString(), lastSenderStructure);
+        this.sendingMsg = new Message(getId(), this.sequenceNumber++, payload.toString(), lastSenderStructure);
     }
 
     private void startSendMsgThread(){

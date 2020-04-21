@@ -9,14 +9,14 @@ public class ConnectNode extends Node {
 
     private void sendMsg(Message msg) {
         // Send the message to all adjacent nodes besides the one that sent it,
-        var lastSender = msg.getLastSender(id);
+        var lastSender = msg.getLastSender(this);
 
         StringBuilder builder = new StringBuilder();
         if(Network.logToConsole) {
             builder.append("Connect ");
             builder.append(getId());
             builder.append(": Repeating message\n");
-            builder.append(msg.toString("\t", getId()));
+            builder.append(msg.toString("\t", this));
         }
 
         for(Node node : adjacent) {
