@@ -9,6 +9,7 @@
 public class Aloha implements Protocol {
     @Override
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
+        node.startSendingTimestamp = System.currentTimeMillis();
 
         // Keep resending the message until there is no collision
         while (true){

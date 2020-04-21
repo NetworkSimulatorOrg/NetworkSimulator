@@ -74,6 +74,8 @@ public class TDMA implements Protocol {
 
     @Override
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
+        node.startSendingTimestamp = System.currentTimeMillis();
+
         int idNumber = node.getIdNumber();
         messages[idNumber] = msg;
 

@@ -43,6 +43,8 @@ public class TokenPassing implements Protocol {
     }
 
     private void passToken(Node node) throws InterruptedException {
+        node.startSendingTimestamp = System.currentTimeMillis();
+
         ComputeNode compute = (ComputeNode) node;
         nextSender = nextComputeNode(node);
         Protocol.sendMsgHelper(node, new Message(node.getId(), sequenceNumber++, "Next Sender:" + nextSender.getId(), compute.getLastSenderStructure()));
@@ -50,6 +52,8 @@ public class TokenPassing implements Protocol {
 
     @Override
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
+        node.startSendingTimestamp = System.currentTimeMillis();
+
         int idNumber = node.getIdNumber();
         // Set data send flag
         // Wait for permission

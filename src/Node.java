@@ -7,6 +7,7 @@ public class Node {
     private final int idNumber;
     private Boolean sending;
     private Integer receivingCount;
+    protected long startSendingTimestamp;
     protected final List<Node> adjacent;
     protected DeltaList sleepList;
     protected int propagationRate;

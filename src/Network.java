@@ -21,7 +21,7 @@ public class Network {
     // Arguments: protocol
     public static void main(String[] args){
         // For serious data generation
-        String[] protocols = {"aloha", "slottedaloha", /*"cdma/cd",*/ "tdma", "polling", "tokenpassing"};
+        String[] protocols = {/*"aloha", "slottedaloha", /*"cdma/cd",*/ "tdma", "polling", "tokenpassing"};
         String[] networks = {"complex-network"/*, "middling-network", "simple-network"*/};
         double[] msgProbability = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1};
         logToConsole = false;

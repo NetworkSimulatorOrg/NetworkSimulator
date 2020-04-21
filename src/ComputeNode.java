@@ -63,7 +63,7 @@ public class ComputeNode extends Node {
                 // TODO: Randomize delay
                 do {
                     // sleep 1/100th of a second between generating doubles.
-                    Thread.sleep(100);
+                    Thread.sleep(1000);
                 } while(this.random.nextDouble() < 1 - this.msgReadyToSendProbability);
             } catch (/*Interrupted*/Exception e) {
                 if(!(e instanceof InterruptedException))

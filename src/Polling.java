@@ -46,6 +46,8 @@ public class Polling implements Protocol {
 
     @Override
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
+        node.startSendingTimestamp = System.currentTimeMillis();
+
         messages.put(msg);
 
         synchronized (messages) {

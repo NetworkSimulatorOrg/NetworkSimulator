@@ -48,17 +48,17 @@ public interface Protocol {
         // Check if this message collided
         if (msg.isCorrupt()) {
             // Report this as a collision
-            Protocol.sendReport(ReportType.Collision, msg, node.getId());
+            Protocol.sendReport(ReportType.Collision, msg, node.getId(), System.currentTimeMillis() - node.startSendingTimestamp );
         } else {
             // Send a report that the message was successfully received by all nodes.
-            Protocol.sendReport(ReportType.Successful, msg, node.getId());
+            Protocol.sendReport(ReportType.Successful, msg, node.getId(), System.currentTimeMillis() - node.startSendingTimestamp );
         }
 
     }
 
 
-    static void sendReport(ReportType type, Message msg, String sender) {
-        Report report = new Report(type, sender, msg);
+    static void sendReport(ReportType type, Message msg, String sender, long timeTaken) {
+        Report report = new Report(type, sender, msg, timeTaken);
         // Send report to network.
         Network.network.sendReport(report);
     }
