@@ -9,7 +9,6 @@ public class TokenPassing implements Protocol {
     private boolean force;
     private Node nextSender;
     private volatile Integer[] sync;
-    private volatile Object[] waitToFinish;
 
     /* Token Passing structure
      * Use an array, one entry per node
@@ -29,11 +28,8 @@ public class TokenPassing implements Protocol {
         this.force = true;
 
         sync = new Integer[Network.nodeCount];
-        waitToFinish = new Object[Network.nodeCount];
         for(int i = 0; i < nodeList.size(); i++) {
             sync[i] = 0;
-            if(nodeList.get(i) instanceof ConnectNode)
-                sync[i] = -1;
         }
     }
 

@@ -19,22 +19,25 @@ public class Network {
     
     // Arguments: protocol
     public static void main(String[] args){
-        /*
         // For serious data generation
-        String[] protocols = {"aloha", "slottedaloha", "cdma/cd", "tdma", "polling", "tokenpassing"};
+        String[] protocols = {"aloha", "slottedaloha", /*"cdma/cd",*/ "tdma", "polling", "tokenpassing"};
         String[] networks = {"simple-network", "middling-network", "complex-network"};
         logToConsole = false;
 
         for(var network : networks) {
             for(var protocol : protocols) {
                 runner(network + ".txt", "csv_" + network + "_" + protocol + ".csv", protocol, 1000 * 10);
+                try {
+                    sleep(10);
+                } catch(InterruptedException e) {
+
+                }
             }
         }
-         */
         // Else
-        logToConsole = true;
-        String protocol = "slottedaloha";
-        runner("complex-network.txt", "csv_complex-network_" + protocol + ".csv", protocol, 1000 * 10);
+//        logToConsole = true;
+//        String protocol = "tdma";
+//        runner("complex-network.txt", "csv_complex-network_" + protocol + ".csv", protocol, 1000 * 10);
     }
 
     public static void runner(String adjacencyList, String outputFile, String networkProtocol, long timeout) {

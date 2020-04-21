@@ -32,9 +32,15 @@ public class Polling implements Protocol {
                     messages.notify();
                 }
 
-            } catch (InterruptedException e) {
+            } catch (/*Interrupted*/Exception e) {
+                if(!(e instanceof InterruptedException)) {
+                    e.printStackTrace();
+                }
                 synchronizingRunning = false;
             }
+        }
+        if(Network.logToConsole) {
+            System.out.println("Protocol terminating synchronizeThread");
         }
     }
 

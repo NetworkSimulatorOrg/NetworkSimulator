@@ -14,7 +14,6 @@ public class TDMA implements Protocol {
 
     /* TDMA structure
      * Use an array, one entry per node
-     *      TODO: only have entries for compute nodes?
      * sending node waits for permission.
      * Sync thread waits while sending
      * sending node notifies sync thread when done
@@ -62,9 +61,14 @@ public class TDMA implements Protocol {
                     timeoutDEV = (long) ((1 - beta) * timeoutDEV + beta * Math.abs(now - then - timeoutEST));
                 }
             } catch (/*Interrupted*/Exception e) {
-                e.printStackTrace();
+                if(!(e instanceof InterruptedException)) {
+                    e.printStackTrace();
+                }
                 synchronizingRunning = false;
             }
+        }
+        if(Network.logToConsole) {
+            System.out.println("Protocol terminating synchronizeThread");
         }
     }
 

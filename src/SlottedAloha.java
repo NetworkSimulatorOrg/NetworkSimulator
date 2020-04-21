@@ -21,9 +21,15 @@ public class SlottedAloha extends Aloha implements Protocol{
             try {
                 // Allow a little extra time in case of congestion
                 Thread.sleep((int)(Network.longestDistance * Network.propagationRate * 1.2));
-            } catch (InterruptedException e) {
+            } catch (/*Interrupted*/Exception e) {
+                if(!(e instanceof InterruptedException)) {
+                    e.printStackTrace();
+                }
                 synchronizingRunning = false;
             }
+        }
+        if(Network.logToConsole) {
+            System.out.println("Protocol terminating synchronizeThread");
         }
     }
 

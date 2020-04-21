@@ -61,6 +61,8 @@ public class ConnectNode extends Node {
             }
         }
 
-        System.out.println("Connect Node " + getId() + " terminating recvMsgThread");
+        if(Network.logToConsole) {
+            System.out.println("Connect Node " + getId() + " terminating recvMsgThread");
+        }
     }
 }
