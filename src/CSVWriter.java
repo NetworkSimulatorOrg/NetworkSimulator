@@ -54,7 +54,7 @@ public class CSVWriter {
     }
 
     public synchronized void bufferWrite(boolean force) {
-        if((force && data.size() > 0) || data.size() > bufferSize) {
+        if((force && data.size() > 0) || data.size() >= bufferSize) {
             if(openFile()) {
                 data.stream()
                         .map(this::convertToCSV)
@@ -75,9 +75,7 @@ public class CSVWriter {
     }
 
     public synchronized void appendLines(ArrayList<String[]> lines) {
-        for (String[] line : lines) {
-            data.add(line);
-        }
+        data.addAll(lines);
         bufferWrite(false);
     }
 

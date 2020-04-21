@@ -12,7 +12,7 @@ public class Network {
     private int msgLength, distance;
     private Protocol protocol;
     private List<Node> nodes;
-    public static CSVWriter writer;
+    public CSVWriter writer;
     public static Network network;
     public static boolean logToConsole;
 
@@ -35,17 +35,14 @@ public class Network {
             }
         }
         // Else
-//        logToConsole = true;
-//        String protocol = "tdma";
+//        logToConsole = false;
+//        String protocol = "tokenpassing";
 //        runner("complex-network.txt", "csv_complex-network_" + protocol + ".csv", protocol, 1000 * 10);
     }
 
     public static void runner(String adjacencyList, String outputFile, String networkProtocol, long timeout) {
         System.out.println("Running network: " + adjacencyList + " \ton protocol " + networkProtocol + " \tfor " + timeout + " ms \toutputted to " + outputFile);
-        writer = new CSVWriter(outputFile);
-        writer.openFile();
-
-        network = new Network();
+        network = new Network(outputFile);
         network.buildNodesFromFile(adjacencyList);
 
         Protocol protocol;
@@ -82,22 +79,26 @@ public class Network {
             System.out.println("main: interrupted");
         } finally {
             System.out.println("ENDING");
-            writer.closeFile();
             network.stop();
         }
     }
 
     public Network() {
         Node.resetIdNumbers();
+        nodeCount = 0;
+        computeNodeCount = 0;
+        longestDistance = 0;
+        propagationRate = 20;
         msgLength = 20;
         distance = 5;
-        propagationRate = 20;
         nodes = new ArrayList<>();
+        protocol = null;
+        writer = null;
     }
 
-    public Network(Protocol protocol){
+    public Network(String outputFile) {
         this();
-        this.protocol = protocol;
+        writer = new CSVWriter(outputFile);
     }
 
     public void setProtocol(Protocol protocol) {
@@ -200,6 +201,7 @@ public class Network {
     }
 
     public void run() {
+        writer.openFile();
         protocol.run();
         for(var node : nodes) {
             node.run();
@@ -211,6 +213,7 @@ public class Network {
         for(var node : nodes) {
             node.terminateThreads();
         }
+        writer.closeFile();
     }
 
     public void sendReport(Report report){
