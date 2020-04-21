@@ -9,6 +9,7 @@ import static java.lang.Thread.*;
 public class Network {
 
     public static int computeNodeCount = 0, nodeCount = 0, longestDistance = 0, propagationRate;
+    public static double msgGenerationProbability = 0.75;
     private int msgLength, distance;
     private Protocol protocol;
     private List<Node> nodes;
@@ -21,16 +22,20 @@ public class Network {
     public static void main(String[] args){
         // For serious data generation
         String[] protocols = {"aloha", "slottedaloha", /*"cdma/cd",*/ "tdma", "polling", "tokenpassing"};
-        String[] networks = {"simple-network", "middling-network", "complex-network"};
+        String[] networks = {"complex-network"/*, "middling-network", "simple-network"*/};
+        double[] msgProbability = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1};
         logToConsole = false;
 
         for(var network : networks) {
             for(var protocol : protocols) {
-                runner(network + ".txt", "csv_" + network + "_" + protocol + ".csv", protocol, 1000 * 10);
-                try {
-                    sleep(10);
-                } catch(InterruptedException e) {
+                for(var probability: msgProbability) {
+                    Network.msgGenerationProbability = probability;
+                    runner(network + ".txt", "csv_" + network + "_" + protocol + "_" + probability + ".csv", protocol, 1000 * 30);
+                    try {
+                        sleep(10);
+                    } catch (InterruptedException e) {
 
+                    }
                 }
             }
         }
@@ -149,7 +154,7 @@ public class Network {
             nodes.add(node);
             nodeCount++;
         } else if(line[0].toUpperCase().equals("COMPUTE")) {
-            node = new ComputeNode(line[1], propagationRate, distance, msgLength, protocol);
+            node = new ComputeNode(line[1], propagationRate, distance, msgLength, protocol, Network.msgGenerationProbability);
             nodes.add(node);
             computeNodeCount++;
             nodeCount++;

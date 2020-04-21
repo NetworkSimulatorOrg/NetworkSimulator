@@ -11,7 +11,6 @@ public class Node {
     protected DeltaList sleepList;
     protected int propagationRate;
     protected int distance, longestDistance;
-    protected long delay = 1000;
     protected Thread receivingThread = null;
     protected Thread sendingThread = null;
     protected volatile boolean receivingRunning = false;
