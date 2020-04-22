@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 public class CSVWriter {
     private String fileName;
-    private boolean lineWrite;
+    private int bufferSize;
     private File file;
     private PrintWriter writer;
     private boolean fileOpen;
@@ -17,8 +17,14 @@ public class CSVWriter {
 
     public CSVWriter(String fileName) {
         this.fileName = fileName;
+        this.bufferSize = 30;
         this.data = new ArrayList<>();
         this.createFile();
+    }
+
+    public CSVWriter(String filename, int bufferSize) {
+        this(filename);
+        this.bufferSize = bufferSize;
     }
 
     public void createFile() {
@@ -48,8 +54,7 @@ public class CSVWriter {
     }
 
     public synchronized void bufferWrite(boolean force) {
-        // TODO: what buffer size?
-        if((force && data.size() > 0) || data.size() > 20) {
+        if((force && data.size() > 0) || data.size() >= bufferSize) {
             if(openFile()) {
                 data.stream()
                         .map(this::convertToCSV)
@@ -70,9 +75,7 @@ public class CSVWriter {
     }
 
     public synchronized void appendLines(ArrayList<String[]> lines) {
-        for (String[] line : lines) {
-            data.add(line);
-        }
+        data.addAll(lines);
         bufferWrite(false);
     }
 

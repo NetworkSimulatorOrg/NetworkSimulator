@@ -1,20 +1,19 @@
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class TDMA implements Protocol {
-    private int frameSize;
-    private int nodeCount;
-    private volatile Integer[] sync;
+    private List<Node> nodeList;
+    private Message[] messages;
     private Thread synchronizing;
-    private long timeoutEST;
-    private long timeoutDEV;
-    private double alpha = 0.125;
-    private double beta = 0.25;
     private volatile boolean synchronizingRunning;
+    private long timeoutEST = 0;
+    private long timeoutDEV = 0;
+    private final double alpha = 0.125;
+    private final double beta = 0.25;
 
     /* TDMA structure
      * Use an array, one entry per node
-     *      TODO: only have entries for compute nodes?
      * sending node waits for permission.
      * Sync thread waits while sending
      * sending node notifies sync thread when done
@@ -23,12 +22,12 @@ public class TDMA implements Protocol {
      *      This allows us not to configure the network to where we must provide a number to ensure the package is sent.
      */
 
-    public TDMA(int frameSize, int nodeCount) {
-        this.frameSize = frameSize;
-        this.nodeCount = nodeCount;
-        sync = new Integer[nodeCount];
-        for(int i = 0; i < nodeCount; i++) {
-            sync[i] = 0;
+    public TDMA(List<Node> nodeList) {
+        this.nodeList = nodeList;
+        messages = new Message[nodeList.size()];
+        for (int i = 0; i < nodeList.size(); i++) {
+            int index = nodeList.get(i).getIdNumber();
+            messages[index] = null;
         }
 
         synchronizing = new Thread(this::synchronizeThread);
@@ -37,48 +36,65 @@ public class TDMA implements Protocol {
     private void synchronizeThread() {
         // After waiting
         synchronizingRunning = true;
-        int step = 0;
-        while(synchronizingRunning) {
+        for(int step = 0; synchronizingRunning; step = (step + 1) % this.nodeList.size()) {
             try {
-                if (sync[step] == 1) {
+                if (nodeList.get(step) instanceof ConnectNode) continue;
+                if(messages[step] == null) {
+                    if (Network.logToConsole) {
+                        System.out.println("System sleeping for " + (timeoutDEV + timeoutEST) + " milliseconds");
+                    }
+                    Thread.sleep(timeoutDEV + timeoutEST);
+                } else {
                     long then = System.currentTimeMillis();
 
-                    sync[step].notify();
-                    Thread.yield();
-                    sync[step].wait();
+                    // Resynchronize
+                    Protocol.sendMsgHelper(Network.network.getNodeById(messages[step].getSender()), messages[step]);
+
+                    assert messages[step] != null;
+                    synchronized (messages[step]) {
+                        messages[step].notify();
+                        messages[step] = null;
+                    }
 
                     long now = System.currentTimeMillis();
                     timeoutEST = (long) ((1 - alpha) * timeoutEST + alpha * (now - then));
                     timeoutDEV = (long) ((1 - beta) * timeoutDEV + beta * Math.abs(now - then - timeoutEST));
-
-                } else {
-                    Thread.sleep(timeoutDEV * 4 + timeoutEST);
                 }
-            } catch (InterruptedException e) {
+            } catch (/*Interrupted*/Exception e) {
+                if(!(e instanceof InterruptedException)) {
+                    e.printStackTrace();
+                }
                 synchronizingRunning = false;
-            } finally {
-                sync[step] = 0;
             }
-            step = (step + 1) % nodeCount;
+        }
+        if(Network.logToConsole) {
+            System.out.println("Protocol terminating synchronizeThread");
         }
     }
 
     @Override
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
-        sync[Integer.parseInt(node.getId())] = 1;
-        sync[Integer.parseInt(node.getId())].wait();
+        node.startSendingTimestamp = System.currentTimeMillis();
 
-        // Send message
-        Protocol.sendMsgHelper(node, msg);
+        int idNumber = node.getIdNumber();
+        messages[idNumber] = msg;
 
-        sync[Integer.parseInt(node.getId())].notify();
-        return null;
+        synchronized (messages[idNumber]) {
+            messages[idNumber].wait();
+        }
+
+        return msg.isCorrupt() ? ProtocolState.Failure : ProtocolState.Success;
     }
 
     @Override
     public ProtocolState recvMsg(Node node, Message msg) {
-        //return super.recvMsg(node, msg);
-        return null;
+        Protocol.recvMsgHelper(node, msg);
+
+        // Check for corruption and collision
+        if(msg.isCorrupt())
+            // Aloha does not stop sending the outgoing message. Do not end the sending delay.
+            return ProtocolState.Failure;
+        return ProtocolState.Success;
     }
 
     @Override

@@ -4,20 +4,27 @@ public class ComputeNode extends Node {
     private int msgLength;
     private Protocol protocol;
     private Message sendingMsg;
+    private double msgReadyToSendProbability;
+    private Random random;
     protected String[] lastSenderStructure;
 
     private int sequenceNumber;
 
-    public ComputeNode(String id, int propagationRate, int distance, int msgLength, Protocol protocol) {
+    public ComputeNode(String id, int propagationRate, int distance, int msgLength, Protocol protocol, double msgReadyToSendProbability) {
         super(id, propagationRate, distance);
         this.msgLength = msgLength;
         this.protocol = protocol;
         this.sequenceNumber = 0;
+        this.msgReadyToSendProbability = msgReadyToSendProbability;
+        this.random = new Random();
 
         // Create necessary threads
         sendingThread = new Thread(this::startSendMsgThread);
         receivingThread = new Thread(this::recvMsgThread);
+    }
 
+    public void setProtocol(Protocol protocol) {
+        this.protocol = protocol;
     }
 
     private void nextMsg() {
@@ -28,25 +35,25 @@ public class ComputeNode extends Node {
             payload.append(getId());
         }
 
-        this.sendingMsg = new Message(id, this.sequenceNumber++, payload.toString(), lastSenderStructure);
+        this.sendingMsg = new Message(getId(), this.sequenceNumber++, payload.toString(), lastSenderStructure);
     }
 
     private void startSendMsgThread(){
         try{
             Thread.sleep(200);
-            // Prepare the first message sent from the node
-            nextMsg();
-            sendMsgThread();
         } catch (Exception e) {
 
         }
+        // Prepare the first message sent from the node
+        nextMsg();
+        sendMsgThread();
     }
 
     private void sendMsgThread() {
         var run = true;
+        long then;
         while(run) {
             try {
-                
                 // Tell the protocol to send the message and check if it sent correctly
                 if (protocol.sendMsg(this, sendingMsg) == ProtocolState.Success) {
                     nextMsg();
@@ -54,13 +61,19 @@ public class ComputeNode extends Node {
 
                 // Delay to represent the new message being sent at a random time
                 // TODO: Randomize delay
-                Thread.sleep(delay);
+                do {
+                    // sleep 1/100th of a second between generating doubles.
+                    Thread.sleep(1000);
+                } while(this.random.nextDouble() < 1 - this.msgReadyToSendProbability);
             } catch (/*Interrupted*/Exception e) {
-                System.out.println(e.toString());
+                if(!(e instanceof InterruptedException))
+                    e.printStackTrace();
                 run = false;
             }
         }
-        System.out.println("Node " + getId() + " terminating sendMsgThread");
+        if(Network.logToConsole) {
+            System.out.println("Compute Node " + getId() + " terminating sendMsgThread");
+        }
     }
 
     private void recvMsgThread() {
@@ -74,12 +87,15 @@ public class ComputeNode extends Node {
                 }
 
             } catch (Exception e) {
-                //System.out.println(e.toString());
-                //e.printStackTrace(System.out);
+                if(!(e instanceof InterruptedException)) {
+                    e.printStackTrace();
+                }
                 sendingRunning = false;
             }
         }
-        System.out.println("Node " + getId() + " terminating recvMsgThread");
+        if(Network.logToConsole) {
+            System.out.println("Compute Node " + getId() + " terminating recvMsgThread");
+        }
     }
 
     public void setSendingCorrupt(){
@@ -92,4 +108,7 @@ public class ComputeNode extends Node {
         lastSenderStructure = new String[size];
     }
 
+    public String[] getLastSenderStructure() {
+        return lastSenderStructure;
+    }
 }

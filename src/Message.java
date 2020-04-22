@@ -25,7 +25,7 @@ public class Message {
         return toString("", null);
     }
 
-    public String toString(String tab, String receivedAt) {
+    public String toString(String tab, Node receivedAt) {
         StringBuilder builder = new StringBuilder();
         builder.append(
                 tab + "+-------------------------------+\n" +
@@ -36,8 +36,8 @@ public class Message {
                 tab + "+ - - Current Hop - - - - - - - +\n");
         if(receivedAt != null) {
             builder.append(
-                    tab + "| Received At: " + receivedAt + "\t\t\t\t|\n" +
-                    tab + "| Last Sender: " + lastSenders[Integer.parseInt(receivedAt)] + "\t\t\t\t|\n"
+                    tab + "| Received At: " + receivedAt.getId() + "\t\t\t\t|\n" +
+                    tab + "| Last Sender: " + lastSenders[receivedAt.getIdNumber()] + "\t\t\t\t|\n"
             );
         }
         builder.append(
@@ -51,8 +51,8 @@ public class Message {
         return sender;
     }
 
-    public String getLastSender(String nodeId) {
-        return lastSenders[Integer.parseInt(nodeId)];
+    public String getLastSender(Node node) {
+        return lastSenders[node.getIdNumber()];
     }
 
     public int getSequenceNumber() {
@@ -62,16 +62,6 @@ public class Message {
     public int getRepeatCount() {
         return repeatCount;
     }
-
-    /*
-    public long getTimestamp(String nodeId) {
-        return timestamps[Integer.parseInt(nodeId)];
-    }
-
-    public void setTimestamp(long timestamp, String nodeId) {
-        timestamps[Integer.parseInt(nodeId)] = timestamp;
-    }
-    */
 
     public String getPayload() {
         return payload;

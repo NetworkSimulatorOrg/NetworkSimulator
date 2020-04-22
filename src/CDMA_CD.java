@@ -1,4 +1,4 @@
-public class CSMA_CD extends Aloha implements Protocol {
+public class CDMA_CD extends Aloha implements Protocol {
 
     @Override
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {

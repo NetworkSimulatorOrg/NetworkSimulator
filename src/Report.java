@@ -2,11 +2,13 @@ public class Report {
     private ReportType type;
     private String sender;
     private Message msg;
+    private long timeTaken;
 
-    public Report(ReportType type, String sender,  Message msg) {
+    public Report(ReportType type, String sender,  Message msg, long timeTaken) {
         this.type = type;
         this.sender = sender;
         this.msg = msg;
+        this.timeTaken = timeTaken;
     }
 
     public ReportType getType(){
@@ -30,13 +32,17 @@ public class Report {
         }
     }
 
-    private void logSuccessful(CSVWriter writer){
-        System.out.println("Success: Node " + sender + "'s message was received by everyone.-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!");
-        writer.appendDataAsLine("Success", sender, Integer.toString(msg.getSequenceNumber()), Integer.toString(msg.getRepeatCount()), "\"" + msg.getPayload() + "\"");
+    private void logSuccessful(CSVWriter writer) {
+        if (Network.logToConsole) {
+            System.out.println("Success: Node " + sender + "'s message was received by everyone.-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!-!");
+        }
+        writer.appendDataAsLine("Success", sender, Integer.toString(msg.getSequenceNumber()), Integer.toString(msg.getRepeatCount()), Long.toString(timeTaken), "\"" + msg.getPayload() + "\"");
     }
 
-    private void logCollision(CSVWriter writer){
-        System.out.println("Collision: " + msg.getPayload() + " collided with another message.");
-        writer.appendDataAsLine("Collision", sender, Integer.toString(msg.getSequenceNumber()), Integer.toString(msg.getRepeatCount()), "\"" + msg.getPayload() + "\"");
+    private void logCollision(CSVWriter writer) {
+        if (Network.logToConsole) {
+            System.out.println("Collision: " + msg.getPayload() + " collided with another message.");
+        }
+        writer.appendDataAsLine("Collision", sender, Integer.toString(msg.getSequenceNumber()), Integer.toString(msg.getRepeatCount()), Long.toString(timeTaken), "\"" + msg.getPayload() + "\"");
     }
 }

@@ -21,14 +21,21 @@ public class SlottedAloha extends Aloha implements Protocol{
             try {
                 // Allow a little extra time in case of congestion
                 Thread.sleep((int)(Network.longestDistance * Network.propagationRate * 1.2));
-            } catch (InterruptedException e) {
+            } catch (/*Interrupted*/Exception e) {
+                if(!(e instanceof InterruptedException)) {
+                    e.printStackTrace();
+                }
                 synchronizingRunning = false;
             }
+        }
+        if(Network.logToConsole) {
+            System.out.println("Protocol terminating synchronizeThread");
         }
     }
 
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
-
+        node.startSendingTimestamp = System.currentTimeMillis();
+        
         // Keep resending the message until there is no collision
         while (true){
 
@@ -41,18 +48,15 @@ public class SlottedAloha extends Aloha implements Protocol{
 
             // Check if this message collided
             if (msg.isCorrupt()){
-                // Report this as a collision
-                Protocol.sendReport(ReportType.Collision, msg, node.getId());
-                
                 // Resend the message at some future time.
                 int delay = (int) (Math.random() * Network.computeNodeCount * node.longestDistance * node.propagationRate);
-                System.out.println("Node " + node.getId() + " will be delayed for " + delay + " ms.");
+                if(Network.logToConsole) {
+                    System.out.println("Node " + node.getId() + " will be delayed for " + delay + " ms.");
+                }
                 Thread.sleep(delay);
                 msg.prepareForRetransmission();
             }
             else{
-                // Send a report that the message was successfully received by all nodes.
-                Protocol.sendReport(ReportType.Successful, msg, node.getId());
                 break;
             }
 

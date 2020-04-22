@@ -38,7 +38,9 @@ public class DeltaList {
     public synchronized Message sleep() throws InterruptedException {
         if(list.size() > 0) {
             //System.out.println("Message " + msgs.get(0).getPayload() + " found in queue.");
-            System.out.println(msgs.get(0).getPayload() + " Sleeping for " + (list.get(0) - System.currentTimeMillis()) + " milliseconds");
+            if(Network.logToConsole) {
+                System.out.println(msgs.get(0).getPayload() + " Sleeping for " + (list.get(0) - System.currentTimeMillis()) + " milliseconds");
+            }
             if (list.get(0) - System.currentTimeMillis() > 5) {
                 Thread.sleep(list.get(0) - System.currentTimeMillis());
             }
