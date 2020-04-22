@@ -9,41 +9,126 @@ import static java.lang.Thread.*;
 public class Network {
 
     public static int computeNodeCount = 0, nodeCount = 0, longestDistance = 0, propagationRate;
+    public static double msgGenerationProbability = 0.75;
     private int msgLength, distance;
     private Protocol protocol;
     private List<Node> nodes;
-    public static CSVWriter writer;
+    public CSVWriter writer;
     public static Network network;
+    public static boolean logToConsole;
 
     
     // Arguments: protocol
     public static void main(String[] args){
-        writer = new CSVWriter("csvOutput.csv");
-        writer.openFile();
+        // For serious data generation
+        String[] protocols = {/*"aloha", "slottedaloha", /*"cdma/cd",*/ "tdma", "polling", "tokenpassing"};
+        String[] networks = {"complex-network"/*, "middling-network", "simple-network"*/};
+        double[] msgProbability = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1};
+        logToConsole = false;
 
-        //Protocol protocol = new Aloha();
-        Protocol protocol = new SlottedAloha();
-        network = new Network(protocol);
-        network.buildNodesFromFile("complex-network.txt");
+        for(var network : networks) {
+            for(var protocol : protocols) {
+                for(var probability: msgProbability) {
+                    Network.msgGenerationProbability = probability;
+                    runner(network + ".txt", "csv_" + network + "_" + protocol + "_" + probability + ".csv", protocol, 1000 * 30);
+                    try {
+                        sleep(10);
+                    } catch (InterruptedException e) {
+
+                    }
+                }
+            }
+        }
+        // Else
+//        logToConsole = false;
+//        String protocol = "tokenpassing";
+//        runner("complex-network.txt", "csv_complex-network_" + protocol + ".csv", protocol, 1000 * 10);
+    }
+
+    public static void runner(String adjacencyList, String outputFile, String networkProtocol, long timeout) {
+        System.out.println("Running network: " + adjacencyList + " \ton protocol " + networkProtocol + " \tfor " + timeout + " ms \toutputted to " + outputFile);
+        network = new Network(outputFile);
+        network.buildNodesFromFile(adjacencyList);
+
+        Protocol protocol;
+        switch(networkProtocol.toUpperCase()) {
+            case "ALOHA":
+                protocol = new Aloha();
+                break;
+            case "SLOTTEDALOHA":
+                protocol = new SlottedAloha();
+                break;
+            case "CDMA/CD":
+                protocol = new CDMA_CD();
+                break;
+            case "POLLING":
+                protocol = new Polling();
+                break;
+            case "TDMA":
+                protocol = new TDMA(network.nodes);
+                break;
+            case "TOKENPASSING":
+                protocol = new TokenPassing(network.nodes);
+                break;
+            default:
+                System.out.println("Unrecognized Protocol Name: " + networkProtocol);
+                return;
+        }
+        network.setProtocol(protocol);
+
         network.run();
 
         try {
-            sleep(1000 * 30);
+            sleep(timeout);
         } catch(InterruptedException e) {
             System.out.println("main: interrupted");
         } finally {
             System.out.println("ENDING");
             network.stop();
-            writer.closeFile();
         }
     }
 
-    public Network(Protocol protocol){
+    public Network() {
+        Node.resetIdNumbers();
+        nodeCount = 0;
+        computeNodeCount = 0;
+        longestDistance = 0;
+        propagationRate = 20;
         msgLength = 20;
         distance = 5;
-        propagationRate = 20;
         nodes = new ArrayList<>();
+        protocol = null;
+        writer = null;
+    }
+
+    public Network(String outputFile) {
+        this();
+        writer = new CSVWriter(outputFile);
+    }
+
+    public void setProtocol(Protocol protocol) {
         this.protocol = protocol;
+
+        for(var node : nodes) {
+            if(node instanceof ComputeNode) {
+                ((ComputeNode) node).setProtocol(protocol);
+            }
+        }
+    }
+
+    public Node getNodeByIdNumber(int idNumber) {
+        if (nodes.get(idNumber).getIdNumber() != idNumber) {
+            // Optimize for the case that nodes are saved in index order.
+            for (int i = 0; i < nodes.size(); i++) {
+                if (nodes.get(i).getIdNumber() == idNumber) {
+                    return nodes.get(i);
+                }
+            }
+            System.out.println("No node found with idNumber: " + idNumber);
+            return null;
+        } else {
+            return nodes.get(idNumber);
+        }
     }
 
     public Node getNodeById(String id) {
@@ -69,7 +154,7 @@ public class Network {
             nodes.add(node);
             nodeCount++;
         } else if(line[0].toUpperCase().equals("COMPUTE")) {
-            node = new ComputeNode(line[1], propagationRate, distance, msgLength, protocol);
+            node = new ComputeNode(line[1], propagationRate, distance, msgLength, protocol, Network.msgGenerationProbability);
             nodes.add(node);
             computeNodeCount++;
             nodeCount++;
@@ -116,13 +201,12 @@ public class Network {
                 if (node.longestDistance > longestDistance){
                     longestDistance = node.longestDistance;
                 }
-
-                System.out.println(node.id + ": " + node.longestDistance);
             }
         }
     }
 
     public void run() {
+        writer.openFile();
         protocol.run();
         for(var node : nodes) {
             node.run();
@@ -134,6 +218,7 @@ public class Network {
         for(var node : nodes) {
             node.terminateThreads();
         }
+        writer.closeFile();
     }
 
     public void sendReport(Report report){
@@ -145,7 +230,7 @@ public class Network {
         // This does not allow for cycles
 
         // Set the original node's lastSenderStructure so that the current node's previous value is the previous node (Used in messages)
-        original.lastSenderStructure[Integer.parseInt(current.getId())] = previous.getId();
+        original.lastSenderStructure[current.getIdNumber()] = previous.getId();
 
         int max = 0;
         boolean isLeaf = true;

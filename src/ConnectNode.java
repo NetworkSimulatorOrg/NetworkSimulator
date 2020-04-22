@@ -9,23 +9,30 @@ public class ConnectNode extends Node {
 
     private void sendMsg(Message msg) {
         // Send the message to all adjacent nodes besides the one that sent it,
-        var lastSender = msg.getLastSender(id);
+        var lastSender = msg.getLastSender(this);
 
         StringBuilder builder = new StringBuilder();
-        builder.append("Connect ");
-        builder.append(getId());
-        builder.append(": Repeating message\n");
-        builder.append(msg.toString("\t", getId()));
+        if(Network.logToConsole) {
+            builder.append("Connect ");
+            builder.append(getId());
+            builder.append(": Repeating message\n");
+            builder.append(msg.toString("\t", this));
+        }
 
         for(Node node : adjacent) {
             if (!node.getId().equals(lastSender)) {
                 super.sendMsg(msg, node.getId());
-                builder.append("\t To ");
-                builder.append(node.getId());
-                builder.append("\n");
+                if(Network.logToConsole) {
+                    builder.append("\t To ");
+                    builder.append(node.getId());
+                    builder.append("\n");
+                }
             }
         }
-        System.out.println(builder.toString());
+
+        if(Network.logToConsole) {
+            System.out.println(builder.toString());
+        }
     }
 
     // This is not needed. Messages actually being passed between
@@ -46,11 +53,16 @@ public class ConnectNode extends Node {
                 }
 
                 //Thread.sleep(delay);
-            } catch(/*Interrupted*/Exception e) {
+            } catch(Exception e) {
+                if(!(e instanceof InterruptedException)) {
+                    e.printStackTrace();
+                }
                 receivingRunning = false;
             }
         }
 
-        System.out.println("Node " + getId() + " terminating recvMsgThread");
+        if(Network.logToConsole) {
+            System.out.println("Connect Node " + getId() + " terminating recvMsgThread");
+        }
     }
 }

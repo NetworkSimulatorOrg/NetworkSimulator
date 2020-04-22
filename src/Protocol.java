@@ -16,20 +16,27 @@ public interface Protocol {
         node.setSending(true);
 
         StringBuilder builder = new StringBuilder();
-        builder.append("Compute ");
-        builder.append(node.getId());
-        builder.append(": Generating message\n");
-        builder.append(msg.toString("\t", node.getId()));
+
+        if(Network.logToConsole) {
+            builder.append("Compute ");
+            builder.append(node.getId());
+            builder.append(": Generating message\n");
+            builder.append(msg.toString("\t", node));
+        }
 
         // Send to all nodes
         for (Node adjacent : node.adjacent) {
             node.sendMsg(msg, adjacent.getId());
-            builder.append("\t To ");
-            builder.append(adjacent.getId());
-            builder.append("\n");
+            if(Network.logToConsole) {
+                builder.append("\t To ");
+                builder.append(adjacent.getId());
+                builder.append("\n");
+            }
         }
 
-        System.out.println(builder.toString());
+        if(Network.logToConsole) {
+            System.out.println(builder.toString());
+        }
 
 
         // Wait the sending thread so that it doesn't try to send another until the first one has been received by every node.
@@ -37,11 +44,21 @@ public interface Protocol {
 
         // Handle node state
         node.setSending(false);
-    }
-    
 
-    static void sendReport(ReportType type, Message msg, String sender) {
-        Report report = new Report(type, sender, msg);
+        // Check if this message collided
+        if (msg.isCorrupt()) {
+            // Report this as a collision
+            Protocol.sendReport(ReportType.Collision, msg, node.getId(), System.currentTimeMillis() - node.startSendingTimestamp );
+        } else {
+            // Send a report that the message was successfully received by all nodes.
+            Protocol.sendReport(ReportType.Successful, msg, node.getId(), System.currentTimeMillis() - node.startSendingTimestamp );
+        }
+
+    }
+
+
+    static void sendReport(ReportType type, Message msg, String sender, long timeTaken) {
+        Report report = new Report(type, sender, msg, timeTaken);
         // Send report to network.
         Network.network.sendReport(report);
     }
@@ -55,7 +72,22 @@ public interface Protocol {
      * Returns FAILURE if failed reception.
      * Returns ERROR if an error occured.
      */
-    ProtocolState recvMsg(Node node, Message msg);
+    ProtocolState recvMsg(Node node, Message msg) throws InterruptedException;
+
+    static void recvMsgHelper(Node node, Message msg) {
+        if(Network.logToConsole) {
+            System.out.println("Node " + node.getId() + " receiving " + msg.getPayload());
+        }
+        // Check if this node is sending
+        if (node instanceof ComputeNode && node.isSending()){
+            // This message that has been received and the message being sent by this node are corrupt.
+            msg.setCorrupt();
+            ((ComputeNode)node).setSendingCorrupt();
+        }
+
+        msg.received();
+    }
+
 
     ProtocolState run();
     ProtocolState terminateThreads();
