@@ -62,7 +62,7 @@ public class ComputeNode extends Node {
                 // Delay to represent the new message being sent at a random time
                 // TODO: Randomize delay
                 do {
-                    // sleep 1/100th of a second between generating doubles.
+                    // sleep one second between generating doubles.
                     Thread.sleep(1000);
                 } while(this.random.nextDouble() < 1 - this.msgReadyToSendProbability);
             } catch (/*Interrupted*/Exception e) {
@@ -110,5 +110,9 @@ public class ComputeNode extends Node {
 
     public String[] getLastSenderStructure() {
         return lastSenderStructure;
+    }
+
+    public Message getCurrentMessage(){
+        return sendingMsg;
     }
 }
