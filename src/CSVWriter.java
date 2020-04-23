@@ -29,6 +29,11 @@ public class CSVWriter {
 
     public void createFile() {
         file = new File(this.fileName);
+        try{
+            file.createNewFile();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     public boolean openFile() {

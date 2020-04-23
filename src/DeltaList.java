@@ -49,4 +49,12 @@ public class DeltaList {
         }
         return null;
     }
+
+    public synchronized int getNumMessages(){
+        return list.size();
+    }
+
+    public synchronized Long getLastTime(){
+        return list.get(list.size()-1);
+    }
 }

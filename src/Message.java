@@ -91,4 +91,9 @@ public class Message {
             this.notifyAll();
         }
     }
+
+    public synchronized void notifyImmediately(){
+        // Used for CDMA_CD to end transmission upon detection of a collision
+        this.notifyAll();
+    }
 }
