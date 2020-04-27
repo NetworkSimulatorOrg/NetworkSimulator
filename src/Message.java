@@ -93,7 +93,7 @@ public class Message {
     }
 
     public synchronized void notifyImmediately(){
-        // Used for CDMA_CD to end transmission upon detection of a collision
+        // Used for CSMA_CD to end transmission upon detection of a collision
         this.notifyAll();
     }
 }
