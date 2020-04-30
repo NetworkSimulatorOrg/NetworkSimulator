@@ -21,7 +21,7 @@ public class Network {
     // Arguments: protocol
     public static void main(String[] args){
         // For serious data generation
-        String[] protocols = {/*"aloha", "slottedaloha",*/ "cdma_cd"/*, "tdma", "polling", "tokenpassing"*/};
+        String[] protocols = {/*"aloha", "slottedaloha",*/ "csma_cd"/*, "tdma", "polling", "tokenpassing"*/};
         String[] networks = {/*"complex-network", */"middling-network", "simple-network"};
         double[] msgProbability = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1};
         logToConsole = false;
@@ -58,8 +58,8 @@ public class Network {
             case "SLOTTEDALOHA":
                 protocol = new SlottedAloha();
                 break;
-            case "CDMA_CD":
-                protocol = new CDMA_CD();
+            case "CSMA_CD":
+                protocol = new CSMA_CD();
                 break;
             case "POLLING":
                 protocol = new Polling();

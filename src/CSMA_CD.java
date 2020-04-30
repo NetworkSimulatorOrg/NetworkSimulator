@@ -1,4 +1,4 @@
-public class CDMA_CD extends Aloha implements Protocol {
+public class CSMA_CD extends Aloha implements Protocol {
 
     @Override
     public ProtocolState sendMsg(Node node, Message msg) throws InterruptedException {
@@ -48,7 +48,7 @@ public class CDMA_CD extends Aloha implements Protocol {
         if (node instanceof ComputeNode && node.isSending()){
             // This message that has been received and the message being sent by this node are corrupt.
             msg.setCorrupt();
-            // CDMA_CD immediately stops sending if there is a corruption
+            // CSMA_CD immediately stops sending if there is a corruption
             msg.notifyImmediately();
 
             // Set this node's message to corrupt and stop sending it
